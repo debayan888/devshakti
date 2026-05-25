@@ -1,0 +1,72 @@
+[Desktop Entry]
+# ============================================================================
+# DevShakti OS — Dolphin Right-Click Context Menu (KDE ServiceMenu)
+# ============================================================================
+# File:        devshakti-wine.desktop
+# Location:    /usr/share/kservices5/ServiceMenus/devshakti-wine.desktop
+# Description: Adds three context-menu actions to Dolphin file manager for
+#              Windows executable files:
+#                1. Run with DevShakti (Windows)
+#                2. Run with DevShakti (NVIDIA GPU)
+#                3. Install Windows App
+#
+# Copyright © 2026 DevShakti Project — All rights reserved.
+# License: GPL-3.0-or-later
+# ============================================================================
+
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+
+# --- MIME Type Filter ---
+# Only show these actions for Windows executable file types
+MimeType=application/x-ms-dos-executable;application/x-msi;application/x-dosexec;application/x-wine-extension-exe;
+
+# --- Actions ---
+# Define the three context-menu actions
+Actions=RunDevShakti;RunDevShaktiNvidia;InstallDevShakti;
+
+# --- Metadata ---
+X-KDE-Priority=TopLevel
+X-KDE-Submenu=DevShakti Wine
+X-KDE-Icon=wine
+
+
+# ============================================================================
+# Action 1: Run with DevShakti (Windows)
+# ============================================================================
+# Launches the selected Windows executable using the default GPU (auto mode).
+# Games will automatically use the NVIDIA dGPU; applications use the iGPU.
+# ============================================================================
+[Desktop Action RunDevShakti]
+Name=Run with DevShakti (Windows)
+Name[en]=Run with DevShakti (Windows)
+Icon=wine
+Exec=devshakti-run-windows %f
+
+
+# ============================================================================
+# Action 2: Run with DevShakti (NVIDIA GPU)
+# ============================================================================
+# Forces the executable to run on the NVIDIA GeForce RTX 4050 dGPU via
+# prime-run or PRIME offload environment variables.  Ideal for demanding
+# games and GPU-intensive applications.
+# ============================================================================
+[Desktop Action RunDevShaktiNvidia]
+Name=Run with DevShakti (NVIDIA GPU)
+Name[en]=Run with DevShakti (NVIDIA GPU)
+Icon=nvidia-settings
+Exec=devshakti-run-windows --gpu=nvidia %f
+
+
+# ============================================================================
+# Action 3: Install Windows App
+# ============================================================================
+# Runs the selected file in installation mode (wine start /wait) — suitable
+# for .exe and .msi installers.  The process waits for the installer to
+# finish before returning.
+# ============================================================================
+[Desktop Action InstallDevShakti]
+Name=Install Windows App
+Name[en]=Install Windows App
+Icon=system-software-install
+Exec=devshakti-run-windows --install %f

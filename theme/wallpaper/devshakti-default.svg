@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 3840 2160"
+     width="3840" height="2160">
+
+  <defs>
+    <!-- Main background gradient: top to bottom -->
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#A8D0E6"/>
+      <stop offset="50%"  stop-color="#B3D9ED"/>
+      <stop offset="100%" stop-color="#C5E1F0"/>
+    </linearGradient>
+
+    <!-- Subtle center radial glow -->
+    <radialGradient id="centerGlow" cx="50%" cy="45%" r="50%" fx="50%" fy="45%">
+      <stop offset="0%"  stop-color="#D6ECF6" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#C5E1F0" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#B3D9ED" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Wave fill colors with low opacity -->
+    <linearGradient id="wave1Fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#9BC5DD" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#9BC5DD" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <linearGradient id="wave2Fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#B8D8EC" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#B8D8EC" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <linearGradient id="wave3Fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#C2DFF2" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#C2DFF2" stop-opacity="0.10"/>
+    </linearGradient>
+
+    <linearGradient id="wave4Fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#D0E8F5" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#D0E8F5" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="3840" height="2160" fill="url(#bgGradient)"/>
+
+  <!-- Subtle radial glow in center -->
+  <rect width="3840" height="2160" fill="url(#centerGlow)"/>
+
+  <!-- Wave 1: Deepest, sits lower -->
+  <path d="M0,1500
+           C480,1380 960,1420 1440,1480
+           C1920,1540 2400,1350 2880,1400
+           C3360,1450 3600,1380 3840,1460
+           L3840,2160 L0,2160 Z"
+        fill="url(#wave1Fill)"/>
+
+  <!-- Wave 2: Mid-depth -->
+  <path d="M0,1600
+           C320,1520 800,1560 1280,1630
+           C1760,1700 2240,1520 2720,1580
+           C3200,1640 3520,1560 3840,1620
+           L3840,2160 L0,2160 Z"
+        fill="url(#wave2Fill)"/>
+
+  <!-- Wave 3: Upper-mid wave with elegant curves -->
+  <path d="M0,1720
+           C640,1660 1120,1740 1600,1700
+           C2080,1660 2560,1750 3040,1690
+           C3360,1650 3680,1710 3840,1730
+           L3840,2160 L0,2160 Z"
+        fill="url(#wave3Fill)"/>
+
+  <!-- Wave 4: Topmost, most subtle -->
+  <path d="M0,1840
+           C480,1800 960,1860 1440,1820
+           C1920,1780 2400,1850 2880,1810
+           C3360,1770 3600,1830 3840,1800
+           L3840,2160 L0,2160 Z"
+        fill="url(#wave4Fill)"/>
+
+  <!-- Very subtle top-left highlight wisp -->
+  <ellipse cx="600" cy="400" rx="800" ry="350"
+           fill="#D6ECF6" opacity="0.12"/>
+
+  <!-- Very subtle bottom-right depth shadow -->
+  <ellipse cx="3200" cy="1800" rx="700" ry="300"
+           fill="#8FBDD4" opacity="0.10"/>
+
+</svg>

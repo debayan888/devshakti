@@ -1,0 +1,117 @@
+[ActionPlugins][0]
+RightButton;NoModifier=org.kde.contextmenu
+MiddleButton;NoModifier=org.kde.paste
+
+[ActionPlugins][1]
+RightButton;NoModifier=org.kde.contextmenu
+
+;; ==========================================================
+;; Containment 1 — Desktop
+;; ==========================================================
+[Containments][1]
+activityId=
+formfactor=0
+immutability=1
+lastScreen=0
+location=0
+plugin=org.kde.desktopcontainment
+wallpaperplugin=org.kde.image
+
+[Containments][1][Wallpaper][org.kde.image][General]
+Image=file:///usr/share/wallpapers/devshakti/devshakti-default.svg
+FillMode=2
+Color=168,208,230
+Blur=false
+
+;; ==========================================================
+;; Containment 2 — Bottom Floating Panel (Dock)
+;; ==========================================================
+[Containments][2]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=4
+plugin=org.kde.panel
+
+[Containments][2][General]
+AppletOrder=3;4;5;6
+
+;; --- Applet 3: App Launcher (Kickoff) ---
+[Containments][2][Applets][3]
+immutability=1
+plugin=org.kde.plasma.kickoff
+
+[Containments][2][Applets][3][Configuration]
+PreloadWeight=100
+
+[Containments][2][Applets][3][Configuration][General]
+icon=start-here-kde-symbolic
+favoritesPortedToKAstats=true
+systemFavorites=suspend\\,hibernate\\,reboot\\,shutdown
+
+[Containments][2][Applets][3][Configuration][Shortcuts]
+global=Alt+F1
+
+;; --- Applet 4: Icons-only Task Manager ---
+[Containments][2][Applets][4]
+immutability=1
+plugin=org.kde.plasma.icontasks
+
+[Containments][2][Applets][4][Configuration][General]
+iconSpacing=2
+launchers=applications:org.kde.dolphin.desktop,applications:firefox.desktop,applications:org.kde.konsole.desktop,applications:org.kde.kate.desktop,applications:systemsettings.desktop
+maxStripes=1
+showOnlyCurrentDesktop=false
+showOnlyCurrentActivity=false
+showOnlyMinimized=false
+sortingStrategy=1
+
+;; --- Applet 5: System Tray ---
+[Containments][2][Applets][5]
+immutability=1
+plugin=org.kde.plasma.systemtray
+
+[Containments][2][Applets][5][Configuration]
+SystrayContainmentId=7
+
+;; --- System Tray sub-containment ---
+[Containments][7]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=4
+plugin=org.kde.plasma.private.systemtray
+
+[Containments][7][General]
+extraItems=org.kde.plasma.bluetooth,org.kde.plasma.networkmanagement,org.kde.plasma.volume,org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.notifications
+knownItems=org.kde.plasma.bluetooth,org.kde.plasma.networkmanagement,org.kde.plasma.volume,org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.notifications,org.kde.plasma.mediacontroller,org.kde.plasma.devicenotifier
+showAllItems=false
+shownItems=org.kde.plasma.volume,org.kde.plasma.networkmanagement,org.kde.plasma.bluetooth
+
+;; --- Applet 6: Digital Clock ---
+[Containments][2][Applets][6]
+immutability=1
+plugin=org.kde.plasma.digitalclock
+
+[Containments][2][Applets][6][Configuration][Appearance]
+use24hFormat=2
+showDate=true
+dateFormat=shortDate
+showSeconds=false
+enabledCalendarPlugins=holidays
+
+[Containments][2][Applets][6][Configuration][General]
+customDateFormat=ddd d MMM
+
+;; ==========================================================
+;; Panel geometry & behavior
+;; ==========================================================
+[Containments][2][ConfigDialog]
+DialogHeight=84
+DialogWidth=1920
+
+[ScreenMapping]
+itemsOnDisabledScreens=
+screenMapping=

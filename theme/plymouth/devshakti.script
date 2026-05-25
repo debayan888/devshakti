@@ -1,0 +1,186 @@
+# DevShakti OS — Plymouth Boot Splash Script
+# A script-based Plymouth theme with pulsing dot progress indicator
+# Uses Plymouth's scripting language (NOT bash)
+
+# ─────────────────────────────────────────
+# Background Setup
+# ─────────────────────────────────────────
+
+# Set background color: light blue #B3D4E6 → RGB(179, 212, 230)
+Window.SetBackgroundTopColor(0.702, 0.831, 0.902);
+Window.SetBackgroundBottomColor(0.659, 0.796, 0.871);
+
+# Screen dimensions
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+# ─────────────────────────────────────────
+# Logo
+# ─────────────────────────────────────────
+
+logo_image = Image("logo.png");
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetX(screen_width / 2 - logo_image.GetWidth() / 2);
+logo_sprite.SetY(screen_height / 2 - logo_image.GetHeight() / 2 - 60);
+logo_sprite.SetOpacity(0);
+
+# ─────────────────────────────────────────
+# Progress Dots (5 pulsing dots)
+# ─────────────────────────────────────────
+
+NUM_DOTS = 5;
+DOT_SIZE = 12;
+DOT_SPACING = 28;
+DOT_Y = screen_height / 2 + 40;
+DOT_START_X = screen_width / 2 - ((NUM_DOTS - 1) * DOT_SPACING) / 2;
+
+# Dot color: accent blue #4A9BD9 → RGB(74, 155, 217)
+dot_image = Image("dot.png");
+
+# Create dot sprites
+for (i = 0; i < NUM_DOTS; i++) {
+    dots[i] = Sprite(dot_image);
+    dots[i].SetX(DOT_START_X + i * DOT_SPACING - DOT_SIZE / 2);
+    dots[i].SetY(DOT_Y - DOT_SIZE / 2);
+    dots[i].SetOpacity(0);
+}
+
+# ─────────────────────────────────────────
+# Animation State
+# ─────────────────────────────────────────
+
+global.progress = 0;
+global.fade_in_done = 0;
+global.fade_in_progress = 0;
+global.time = 0;
+
+# ─────────────────────────────────────────
+# Refresh Callback — runs every frame
+# ─────────────────────────────────────────
+
+fun refresh_callback() {
+    global.time++;
+
+    # ── Fade-in animation (first 60 frames ≈ 1 second) ──
+    if (global.fade_in_progress < 1) {
+        global.fade_in_progress = Math.Min(1, global.fade_in_progress + 0.017);
+        logo_sprite.SetOpacity(global.fade_in_progress);
+
+        for (i = 0; i < NUM_DOTS; i++) {
+            dots[i].SetOpacity(global.fade_in_progress * 0.3);
+        }
+    }
+
+    # ── Pulsing dot animation ──
+    # Each dot pulses in sequence with a sine wave
+    for (i = 0; i < NUM_DOTS; i++) {
+        # Phase offset for each dot
+        phase = global.time * 0.05 - i * 0.8;
+
+        # Sine pulse: range from 0.2 to 1.0
+        pulse = Math.Sin(phase);
+        if (pulse < 0) pulse = 0;
+
+        opacity = 0.25 + pulse * 0.75;
+
+        if (global.fade_in_progress >= 1) {
+            dots[i].SetOpacity(opacity);
+        }
+    }
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# ─────────────────────────────────────────
+# Boot Progress Callback
+# ─────────────────────────────────────────
+
+fun boot_progress_callback(duration, progress) {
+    global.progress = progress;
+}
+
+Plymouth.SetBootProgressFunction(boot_progress_callback);
+
+# ─────────────────────────────────────────
+# Password Prompt (for LUKS encryption)
+# ─────────────────────────────────────────
+
+fun display_password_callback(prompt, bullets) {
+    # Create or update password prompt
+    if (!global.password_dialog) {
+        global.password_label = Image.Text(prompt, 0.102, 0.165, 0.227, 1, "Inter 14");
+        global.password_label_sprite = Sprite(global.password_label);
+        global.password_label_sprite.SetX(screen_width / 2 - global.password_label.GetWidth() / 2);
+        global.password_label_sprite.SetY(screen_height / 2 + 100);
+
+        global.password_box_image = Image("entry.png");
+        global.password_box_sprite = Sprite(global.password_box_image);
+        global.password_box_sprite.SetX(screen_width / 2 - global.password_box_image.GetWidth() / 2);
+        global.password_box_sprite.SetY(screen_height / 2 + 130);
+
+        global.password_dialog = 1;
+    }
+
+    # Draw bullet characters for entered password
+    bullet_string = "";
+    for (i = 0; i < bullets; i++) {
+        bullet_string += "●";
+    }
+
+    if (bullets > 0) {
+        bullet_image = Image.Text(bullet_string, 0.102, 0.165, 0.227, 1, "Inter 16");
+        if (global.bullet_sprite) global.bullet_sprite.SetOpacity(0);
+        global.bullet_sprite = Sprite(bullet_image);
+        global.bullet_sprite.SetX(screen_width / 2 - bullet_image.GetWidth() / 2);
+        global.bullet_sprite.SetY(screen_height / 2 + 138);
+    }
+}
+
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+# ─────────────────────────────────────────
+# Message Display
+# ─────────────────────────────────────────
+
+message_sprites = [];
+message_count = 0;
+
+fun message_callback(text) {
+    if (text == "") return;
+
+    msg_image = Image.Text(text, 0.290, 0.608, 0.851, 1, "Inter 11");
+    msg_sprite = Sprite(msg_image);
+    msg_sprite.SetX(screen_width / 2 - msg_image.GetWidth() / 2);
+    msg_sprite.SetY(screen_height - 60);
+    msg_sprite.SetOpacity(0.8);
+
+    # Hide previous messages
+    if (global.last_message_sprite) {
+        global.last_message_sprite.SetOpacity(0);
+    }
+    global.last_message_sprite = msg_sprite;
+}
+
+Plymouth.SetMessageFunction(message_callback);
+
+# ─────────────────────────────────────────
+# Quit Callback — fade out
+# ─────────────────────────────────────────
+
+fun quit_callback() {
+    # Fade out everything
+    logo_sprite.SetOpacity(0);
+    for (i = 0; i < NUM_DOTS; i++) {
+        dots[i].SetOpacity(0);
+    }
+    if (global.last_message_sprite)
+        global.last_message_sprite.SetOpacity(0);
+    if (global.password_label_sprite)
+        global.password_label_sprite.SetOpacity(0);
+    if (global.password_box_sprite)
+        global.password_box_sprite.SetOpacity(0);
+    if (global.bullet_sprite)
+        global.bullet_sprite.SetOpacity(0);
+}
+
+Plymouth.SetQuitFunction(quit_callback);

@@ -1,0 +1,44 @@
+# Force LF line endings for all shell scripts and Linux config files
+# (CRLF will break bash scripts on Linux)
+*.sh text eol=lf
+*.conf text eol=lf
+*.cfg text eol=lf
+*.service text eol=lf
+*.rules text eol=lf
+*.desktop text eol=lf
+*.xml text eol=lf
+*.colors text eol=lf
+*.plymouth text eol=lf
+*.script text eol=lf
+*.qml text eol=lf
+*.kvconfig text eol=lf
+*.svg text eol=lf
+
+# Text files that need LF
+packages.x86_64 text eol=lf
+hostname text eol=lf
+locale.conf text eol=lf
+locale.gen text eol=lf
+vconsole.conf text eol=lf
+environment text eol=lf
+mkinitcpio.conf text eol=lf
+grub text eol=lf
+kdeglobals text eol=lf
+kwinrc text eol=lf
+plasmashellrc text eol=lf
+plasma-org.kde.plasma.desktop-appletsrc text eol=lf
+
+# Web preview can use any line ending
+*.html text
+*.css text
+*.js text
+
+# YAML
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary
+*.iso binary
+*.img binary
+*.png binary
+*.jpg binary

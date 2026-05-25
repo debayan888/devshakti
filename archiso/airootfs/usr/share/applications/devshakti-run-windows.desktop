@@ -1,0 +1,42 @@
+[Desktop Entry]
+# ============================================================================
+# DevShakti OS — Windows Application Launcher (.desktop)
+# ============================================================================
+# File:        devshakti-run-windows.desktop
+# Location:    /usr/share/applications/devshakti-run-windows.desktop
+# Description: XDG Desktop Entry for launching Windows executables via the
+#              DevShakti Wine integration layer.  Registers as the default
+#              handler for .exe, .msi, .bat, and .lnk MIME types.
+#
+# Copyright © 2026 DevShakti Project — All rights reserved.
+# License: GPL-3.0-or-later
+# ============================================================================
+
+Type=Application
+Version=1.5
+
+# --- Display ---
+Name=Run Windows Application
+GenericName=Windows Compatibility Layer
+Comment=Run Windows applications and games with DevShakti Wine integration
+Icon=wine
+
+# --- Execution ---
+# %f is replaced by the file path of the dropped/opened file
+Exec=devshakti-run-windows %f
+Terminal=false
+StartupNotify=true
+StartupWMClass=Wine
+
+# --- MIME Types ---
+# Associates this launcher with Windows executable formats
+MimeType=application/x-ms-dos-executable;application/x-msi;application/x-bat;application/x-ms-shortcut;application/x-wine-extension-exe;application/x-dosexec;
+
+# --- Categories ---
+# System utility + Wine + Game (appears in relevant application menus)
+Categories=System;Wine;Game;Utility;
+
+# --- Additional Metadata ---
+Keywords=wine;windows;exe;msi;game;proton;dxvk;directx;vulkan;
+X-Desktop-File-Install-Version=0.26
+X-KDE-SubstituteUID=false

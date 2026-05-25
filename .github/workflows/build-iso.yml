@@ -1,0 +1,354 @@
+name: Build DevShakti OS ISO
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+env:
+  ISO_NAME: devshakti
+  ISO_VERSION: "1.0"
+
+jobs:
+  build-iso:
+    name: Build DevShakti ISO
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      # ──────────────────────────────────────────────────
+      # 1. Checkout source code
+      # ──────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ──────────────────────────────────────────────────
+      # 2. Free up disk space (GitHub runners have ~14GB)
+      # ──────────────────────────────────────────────────
+      - name: Free disk space
+        run: |
+          echo "=== Before cleanup ==="
+          df -h /
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache
+          sudo apt-get clean
+          echo "=== After cleanup ==="
+          df -h /
+
+      # ──────────────────────────────────────────────────
+      # 3. Install Arch Linux bootstrap via Docker
+      # ──────────────────────────────────────────────────
+      - name: Build ISO in Arch Linux container
+        run: |
+          # Pull the official Arch Linux Docker image
+          docker pull archlinux:latest
+
+          # Run the entire build inside the Arch container
+          docker run --rm \
+            --privileged \
+            -v "${{ github.workspace }}:/build" \
+            -v "/tmp/iso-output:/output" \
+            archlinux:latest \
+            /bin/bash -c '
+              set -euo pipefail
+
+              echo "╔══════════════════════════════════════════════╗"
+              echo "║   DevShakti OS — Automated ISO Builder       ║"
+              echo "╚══════════════════════════════════════════════╝"
+
+              # ── Update system and install archiso ──
+              echo ">>> Installing archiso and dependencies..."
+              pacman -Syu --noconfirm
+              pacman -S --noconfirm archiso git base-devel
+
+              # ── Copy project files ──
+              echo ">>> Setting up build workspace..."
+              mkdir -p /tmp/devshakti-build
+              cp -r /build/archiso/* /tmp/devshakti-build/
+
+              # ── Create airootfs directories ──
+              mkdir -p /tmp/devshakti-build/airootfs
+
+              # Copy all airootfs content
+              if [ -d /build/archiso/airootfs ]; then
+                cp -r /build/archiso/airootfs/* /tmp/devshakti-build/airootfs/ 2>/dev/null || true
+              fi
+
+              # ── Set up systemd service symlinks ──
+              echo ">>> Creating systemd service symlinks..."
+              mkdir -p /tmp/devshakti-build/airootfs/etc/systemd/system/multi-user.target.wants
+              mkdir -p /tmp/devshakti-build/airootfs/etc/systemd/system/sockets.target.wants
+
+              # SDDM display manager
+              ln -sf /usr/lib/systemd/system/sddm.service \
+                /tmp/devshakti-build/airootfs/etc/systemd/system/display-manager.service
+
+              # NetworkManager
+              ln -sf /usr/lib/systemd/system/NetworkManager.service \
+                /tmp/devshakti-build/airootfs/etc/systemd/system/multi-user.target.wants/NetworkManager.service
+
+              # Bluetooth
+              ln -sf /usr/lib/systemd/system/bluetooth.service \
+                /tmp/devshakti-build/airootfs/etc/systemd/system/multi-user.target.wants/bluetooth.service
+
+              # TLP
+              ln -sf /usr/lib/systemd/system/tlp.service \
+                /tmp/devshakti-build/airootfs/etc/systemd/system/multi-user.target.wants/tlp.service
+
+              # ACPID
+              ln -sf /usr/lib/systemd/system/acpid.service \
+                /tmp/devshakti-build/airootfs/etc/systemd/system/multi-user.target.wants/acpid.service
+
+              # fstrim timer
+              ln -sf /usr/lib/systemd/system/fstrim.timer \
+                /tmp/devshakti-build/airootfs/etc/systemd/system/multi-user.target.wants/fstrim.timer
+
+              # ── Set file permissions ──
+              echo ">>> Setting file permissions..."
+              chmod 755 /tmp/devshakti-build/airootfs/usr/local/bin/* 2>/dev/null || true
+
+              if [ -f /tmp/devshakti-build/airootfs/etc/shadow ]; then
+                chmod 400 /tmp/devshakti-build/airootfs/etc/shadow
+              fi
+              if [ -f /tmp/devshakti-build/airootfs/etc/gshadow ]; then
+                chmod 400 /tmp/devshakti-build/airootfs/etc/gshadow
+              fi
+
+              # ── Copy installer scripts into the ISO ──
+              echo ">>> Adding installer scripts..."
+              mkdir -p /tmp/devshakti-build/airootfs/usr/local/bin
+              if [ -f /build/installer/devshakti-install.sh ]; then
+                cp /build/installer/devshakti-install.sh \
+                  /tmp/devshakti-build/airootfs/usr/local/bin/devshakti-install
+                chmod 755 /tmp/devshakti-build/airootfs/usr/local/bin/devshakti-install
+              fi
+              if [ -f /build/installer/first-boot.sh ]; then
+                cp /build/installer/first-boot.sh \
+                  /tmp/devshakti-build/airootfs/usr/local/bin/devshakti-first-boot
+                chmod 755 /tmp/devshakti-build/airootfs/usr/local/bin/devshakti-first-boot
+              fi
+
+              # ── Copy theme files ──
+              echo ">>> Installing theme files..."
+              mkdir -p /tmp/devshakti-build/airootfs/usr/share/sddm/themes/DevShakti
+              if [ -d /build/theme/sddm ]; then
+                cp -r /build/theme/sddm/* \
+                  /tmp/devshakti-build/airootfs/usr/share/sddm/themes/DevShakti/
+              fi
+
+              mkdir -p /tmp/devshakti-build/airootfs/usr/share/plymouth/themes/devshakti
+              if [ -d /build/theme/plymouth ]; then
+                cp -r /build/theme/plymouth/* \
+                  /tmp/devshakti-build/airootfs/usr/share/plymouth/themes/devshakti/
+              fi
+
+              mkdir -p /tmp/devshakti-build/airootfs/usr/share/color-schemes
+              if [ -f /build/theme/plasma/DevShakti.colors ]; then
+                cp /build/theme/plasma/DevShakti.colors \
+                  /tmp/devshakti-build/airootfs/usr/share/color-schemes/
+              fi
+
+              mkdir -p /tmp/devshakti-build/airootfs/usr/share/wallpapers/devshakti
+              if [ -f /build/theme/wallpaper/devshakti-default.svg ]; then
+                cp /build/theme/wallpaper/devshakti-default.svg \
+                  /tmp/devshakti-build/airootfs/usr/share/wallpapers/devshakti/
+              fi
+
+              # ── SDDM config ──
+              mkdir -p /tmp/devshakti-build/airootfs/etc/sddm.conf.d
+              cat > /tmp/devshakti-build/airootfs/etc/sddm.conf.d/devshakti.conf << SDDM_CONF
+          [General]
+          InputMethod=
+          Numlock=on
+
+          [Theme]
+          Current=DevShakti
+          CursorSize=24
+
+          [Users]
+          MaximumUid=60513
+          MinimumUid=1000
+          RememberLastSession=true
+          RememberLastUser=true
+
+          [Wayland]
+          SessionDir=/usr/share/wayland-sessions
+
+          [X11]
+          SessionDir=/usr/share/xsessions
+          SDDM_CONF
+
+              # ── Plymouth config ──
+              mkdir -p /tmp/devshakti-build/airootfs/etc/plymouth
+              cat > /tmp/devshakti-build/airootfs/etc/plymouth/plymouthd.conf << PLYMOUTH_CONF
+          [Daemon]
+          Theme=devshakti
+          ShowDelay=0
+          DeviceTimeout=8
+
+          [BootUp]
+          ShouldStayActive=true
+          PLYMOUTH_CONF
+
+              # ── Create live user (for the live ISO session) ──
+              echo ">>> Configuring live user..."
+              mkdir -p /tmp/devshakti-build/airootfs/etc
+              cat > /tmp/devshakti-build/airootfs/etc/passwd << PASSWD_CONF
+          root:x:0:0:root:/root:/bin/bash
+          devshakti:x:1000:1000:DevShakti Live User:/home/devshakti:/bin/zsh
+          PASSWD_CONF
+
+              cat > /tmp/devshakti-build/airootfs/etc/group << GROUP_CONF
+          root:x:0:
+          wheel:x:10:devshakti
+          video:x:44:devshakti
+          audio:x:92:devshakti
+          storage:x:95:devshakti
+          optical:x:93:devshakti
+          network:x:90:devshakti
+          power:x:98:devshakti
+          devshakti:x:1000:
+          GROUP_CONF
+
+              # Empty password for live user (auto-login)
+              cat > /tmp/devshakti-build/airootfs/etc/shadow << SHADOW_CONF
+          root::14871::::::
+          devshakti::14871::::::
+          SHADOW_CONF
+              chmod 400 /tmp/devshakti-build/airootfs/etc/shadow
+
+              cat > /tmp/devshakti-build/airootfs/etc/gshadow << GSHADOW_CONF
+          root:::
+          wheel:::devshakti
+          devshakti:::
+          GSHADOW_CONF
+              chmod 400 /tmp/devshakti-build/airootfs/etc/gshadow
+
+              # Sudo access for live user
+              mkdir -p /tmp/devshakti-build/airootfs/etc/sudoers.d
+              echo "devshakti ALL=(ALL) NOPASSWD: ALL" > \
+                /tmp/devshakti-build/airootfs/etc/sudoers.d/10-devshakti
+              chmod 440 /tmp/devshakti-build/airootfs/etc/sudoers.d/10-devshakti
+
+              # ── Copy skel to live user home ──
+              mkdir -p /tmp/devshakti-build/airootfs/home/devshakti
+              if [ -d /tmp/devshakti-build/airootfs/etc/skel/.config ]; then
+                cp -r /tmp/devshakti-build/airootfs/etc/skel/.config \
+                  /tmp/devshakti-build/airootfs/home/devshakti/
+              fi
+
+              # ── SDDM autologin for live session ──
+              mkdir -p /tmp/devshakti-build/airootfs/etc/sddm.conf.d
+              cat > /tmp/devshakti-build/airootfs/etc/sddm.conf.d/autologin.conf << AUTOLOGIN
+          [Autologin]
+          User=devshakti
+          Session=plasma
+          AUTOLOGIN
+
+              # ── Add desktop shortcut for installer ──
+              mkdir -p /tmp/devshakti-build/airootfs/home/devshakti/Desktop
+              cat > /tmp/devshakti-build/airootfs/home/devshakti/Desktop/install-devshakti.desktop << INSTALL_DESKTOP
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Install DevShakti OS
+          Comment=Install DevShakti OS to your hard drive
+          Exec=konsole -e sudo devshakti-install
+          Icon=system-software-install
+          Terminal=false
+          Categories=System;
+          INSTALL_DESKTOP
+              chmod 755 /tmp/devshakti-build/airootfs/home/devshakti/Desktop/install-devshakti.desktop
+
+              # ── Build the ISO ──
+              echo ""
+              echo "╔══════════════════════════════════════════════╗"
+              echo "║   Building ISO — this takes 20-40 minutes    ║"
+              echo "╚══════════════════════════════════════════════╝"
+              echo ""
+
+              mkarchiso -v \
+                -w /tmp/archiso-work \
+                -o /output \
+                /tmp/devshakti-build
+
+              echo ""
+              echo "╔══════════════════════════════════════════════╗"
+              echo "║   ✓  ISO Build Complete!                     ║"
+              echo "╚══════════════════════════════════════════════╝"
+
+              # Show ISO info
+              ls -lh /output/*.iso
+              sha256sum /output/*.iso
+            '
+
+      # ──────────────────────────────────────────────────
+      # 4. Upload ISO as GitHub Release artifact
+      # ──────────────────────────────────────────────────
+      - name: Get ISO filename
+        id: iso_info
+        run: |
+          ISO_FILE=$(ls /tmp/iso-output/*.iso 2>/dev/null | head -1)
+          if [ -n "$ISO_FILE" ]; then
+            echo "iso_path=$ISO_FILE" >> $GITHUB_OUTPUT
+            echo "iso_name=$(basename $ISO_FILE)" >> $GITHUB_OUTPUT
+            echo "iso_size=$(du -h $ISO_FILE | cut -f1)" >> $GITHUB_OUTPUT
+            echo "iso_sha256=$(sha256sum $ISO_FILE | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+            echo "ISO found: $ISO_FILE"
+          else
+            echo "ERROR: No ISO file found!"
+            exit 1
+          fi
+
+      - name: Upload ISO as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: devshakti-os-iso
+          path: ${{ steps.iso_info.outputs.iso_path }}
+          retention-days: 30
+          compression-level: 0  # ISO is already compressed
+
+      # ──────────────────────────────────────────────────
+      # 5. Create GitHub Release (only on tags)
+      # ──────────────────────────────────────────────────
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "DevShakti OS ${{ github.ref_name }}"
+          body: |
+            ## DevShakti OS ${{ github.ref_name }}
+
+            **Custom Arch Linux distribution for HP Victus 15**
+
+            ### Highlights
+            - 🖥️ macOS-inspired KDE Plasma desktop with DevShakti Blue theme
+            - 🪟 Windows app drag-and-drop support (Wine + DXVK + VKD3D-Proton)
+            - 🎮 Full gaming support (Steam, Proton, Lutris, Vulkan, OpenGL)
+            - ⚡ Optimized for AMD Ryzen 7 7445HS + NVIDIA RTX 4050
+            - 🔋 Intelligent power management (AC performance / Battery saver)
+            - 💿 3-mode installer (Full Disk / Dual Boot / Custom)
+
+            ### Download
+            | File | Size | SHA-256 |
+            |---|---|---|
+            | `${{ steps.iso_info.outputs.iso_name }}` | ${{ steps.iso_info.outputs.iso_size }} | `${{ steps.iso_info.outputs.iso_sha256 }}` |
+
+            ### Installation
+            1. Download the ISO below
+            2. Flash to USB: `sudo dd bs=4M if=devshakti-*.iso of=/dev/sdX status=progress`
+               - Or use [Rufus](https://rufus.ie) on Windows (DD mode)
+               - Or use [balenaEtcher](https://etcher.balena.io)
+            3. Boot from USB (F9 on HP Victus)
+            4. Double-click "Install DevShakti OS" on the desktop
+            5. Choose: Full Disk / Dual Boot / Custom Partition
+            6. Reboot and enjoy! ⚡
+          files: |
+            ${{ steps.iso_info.outputs.iso_path }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,22 @@
+[General]
+ColorScheme=DevShakti
+Name=DevShakti Blue
+widgetStyle=kvantum
+fixed=Fira Code,10,-1,5,50,0,0,0,0,0
+font=Inter,10,-1,5,50,0,0,0,0,0
+menuFont=Inter,10,-1,5,50,0,0,0,0,0
+smallestReadableFont=Inter,8,-1,5,50,0,0,0,0,0
+toolBarFont=Inter,9,-1,5,50,0,0,0,0,0
+
+[Icons]
+Theme=WhiteSur-dark
+
+[KDE]
+LookAndFeelPackage=com.github.vinceliuice.WhiteSur-dark
+SingleClick=false
+AnimationDurationFactor=0.5
+
+[WM]
+activeBackground=74,155,217
+activeFont=Inter,10,-1,5,75,0,0,0,0,0
+inactiveBackground=180,210,235

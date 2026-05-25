@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=DevShakti First Boot Setup
+Comment=Runs first-time setup for DevShakti OS
+Exec=/usr/local/bin/devshakti-first-boot
+Terminal=true
+X-KDE-autostart-phase=2
+X-KDE-autostart-condition=FileNotFound:~/.config/devshakti-setup-done
+Icon=preferences-system
+Categories=System;

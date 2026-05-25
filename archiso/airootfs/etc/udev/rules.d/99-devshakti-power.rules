@@ -1,0 +1,193 @@
+# ============================================================================
+#  DevShakti OS — Dynamic Power Management udev Rules
+#  /etc/udev/rules.d/99-devshakti-power.rules
+# ============================================================================
+#
+#  Hardware Target : HP Victus 15
+#  CPU             : AMD Ryzen 7 7445HS
+#  iGPU            : AMD Radeon 760M
+#  dGPU            : NVIDIA GeForce RTX 4050 Laptop
+#  Battery         : 75 Wh
+#
+#  These rules automatically respond to power source changes (AC ↔ Battery)
+#  and configure hardware for optimal power/performance trade-offs.
+#
+#  Rule ordering:
+#    99- prefix ensures these run after all vendor/driver rules.
+#
+#  Dependencies:
+#    - tlp (>= 1.6)
+#    - devshakti-power-mode script at /usr/local/bin/devshakti-power-mode
+#    - brightnessctl (for backlight control)
+#    - NVIDIA driver with runtime PM support
+#
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+#  Rule 1 — AC Adapter Connected: Switch to Performance Profile
+# ----------------------------------------------------------------------------
+#
+#  Triggered when the AC adapter power supply reports "1" (online).
+#  This fires on initial plug-in and on resume from suspend with AC.
+#
+#  Actions:
+#    - Switch TLP to AC mode via `tlp ac`
+#    - Run devshakti-power-mode in "balanced" as sensible AC default
+#    - Set backlight to 80% for comfortable plugged-in brightness
+#
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", \
+    TAG+="systemd", \
+    RUN+="/usr/bin/tlp ac", \
+    RUN+="/usr/local/bin/devshakti-power-mode balanced --quiet", \
+    RUN+="/usr/bin/brightnessctl --device=amdgpu_bl1 set 80%%"
+
+
+# ----------------------------------------------------------------------------
+#  Rule 2 — AC Adapter Disconnected: Switch to Battery Saver Profile
+# ----------------------------------------------------------------------------
+#
+#  Triggered when the AC adapter power supply reports "0" (offline).
+#  This fires when the charger is physically unplugged.
+#
+#  Actions:
+#    - Switch TLP to BAT mode via `tlp bat`
+#    - Run devshakti-power-mode in "battery" for max savings
+#    - Reduce backlight to 40% to conserve battery
+#
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", \
+    TAG+="systemd", \
+    RUN+="/usr/bin/tlp bat", \
+    RUN+="/usr/local/bin/devshakti-power-mode battery --quiet", \
+    RUN+="/usr/bin/brightnessctl --device=amdgpu_bl1 set 40%%"
+
+
+# ----------------------------------------------------------------------------
+#  Rule 3 — Battery State Change Monitoring
+# ----------------------------------------------------------------------------
+#
+#  Monitor battery charge state changes (charging, discharging, full).
+#  Logs state transitions for diagnostic purposes.
+#  The ATTR{status} can be: "Charging", "Discharging", "Full", "Not charging".
+#
+SUBSYSTEM=="power_supply", ATTR{type}=="Battery", \
+    ENV{POWER_SUPPLY_STATUS}=="Discharging", \
+    TAG+="systemd", \
+    RUN+="/usr/bin/logger -t devshakti-power 'Battery discharging — power saver active'"
+
+SUBSYSTEM=="power_supply", ATTR{type}=="Battery", \
+    ENV{POWER_SUPPLY_STATUS}=="Charging", \
+    TAG+="systemd", \
+    RUN+="/usr/bin/logger -t devshakti-power 'Battery charging — thresholds 40-80%%'"
+
+SUBSYSTEM=="power_supply", ATTR{type}=="Battery", \
+    ENV{POWER_SUPPLY_STATUS}=="Full", \
+    TAG+="systemd", \
+    RUN+="/usr/bin/logger -t devshakti-power 'Battery fully charged'"
+
+
+# ----------------------------------------------------------------------------
+#  Rule 4 — NVIDIA RTX 4050 Runtime Power Management
+# ----------------------------------------------------------------------------
+#
+#  Enable runtime PM for the NVIDIA dGPU to allow it to enter D3 (off)
+#  when not in use.  This is critical for battery life on hybrid GPU
+#  laptops.  The NVIDIA driver (>=530) supports D3cold with runtime PM.
+#
+#  PCI class 0x03 = Display controller (covers both 3D controller and VGA).
+#  Vendor 0x10de = NVIDIA Corporation.
+#
+#  When on battery, set runtime PM to "auto" so the GPU can suspend.
+#  The driver and nvidia-persistenced handle wake-up automatically.
+#
+#  Note: On AC, TLP's RUNTIME_PM_ON_AC=on keeps the GPU fully powered.
+#        These rules only apply additional battery-specific behavior.
+#
+
+# NVIDIA GPU — Enable runtime PM when added (boot time)
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", \
+    ATTR{power/control}="auto", \
+    RUN+="/usr/bin/logger -t devshakti-power 'NVIDIA RTX 4050: runtime PM set to auto'"
+
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", \
+    ATTR{power/control}="auto", \
+    RUN+="/usr/bin/logger -t devshakti-power 'NVIDIA RTX 4050 (3D controller): runtime PM set to auto'"
+
+# NVIDIA Audio device associated with dGPU — also enable runtime PM
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x040300", \
+    ATTR{power/control}="auto", \
+    RUN+="/usr/bin/logger -t devshakti-power 'NVIDIA HD Audio: runtime PM set to auto'"
+
+
+# ----------------------------------------------------------------------------
+#  Rule 5 — AMD Radeon 760M iGPU Power Profile
+# ----------------------------------------------------------------------------
+#
+#  Set the AMD iGPU to a low power profile at boot.
+#  The devshakti-power-mode script handles dynamic switching.
+#
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1002", ATTR{class}=="0x030000", \
+    RUN+="/usr/bin/logger -t devshakti-power 'AMD Radeon 760M: initialized'"
+
+
+# ----------------------------------------------------------------------------
+#  Rule 6 — Backlight Device Registration
+# ----------------------------------------------------------------------------
+#
+#  When the AMD GPU backlight device appears, set initial brightness.
+#  This ensures a sensible default even before the desktop environment loads.
+#
+ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="amdgpu_bl1", \
+    RUN+="/usr/bin/brightnessctl --device=amdgpu_bl1 set 60%%", \
+    RUN+="/usr/bin/logger -t devshakti-power 'Backlight amdgpu_bl1 initialized at 60%%'"
+
+
+# ----------------------------------------------------------------------------
+#  Rule 7 — USB Power Management for Gaming Peripherals
+# ----------------------------------------------------------------------------
+#
+#  Disable autosuspend for common gaming mice and keyboards to prevent
+#  input lag.  Add VID:PID pairs as needed.
+#
+#  These override TLP's global USB_AUTOSUSPEND setting for specific devices.
+#
+
+# Generic gaming mouse — disable autosuspend for all USB HID mice
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="03", \
+    ATTR{bInterfaceProtocol}=="02", \
+    ATTR{power/control}="on", \
+    RUN+="/usr/bin/logger -t devshakti-power 'USB mouse: autosuspend disabled'"
+
+# Generic USB keyboard — disable autosuspend
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="03", \
+    ATTR{bInterfaceProtocol}=="01", \
+    ATTR{power/control}="on", \
+    RUN+="/usr/bin/logger -t devshakti-power 'USB keyboard: autosuspend disabled'"
+
+
+# ----------------------------------------------------------------------------
+#  Rule 8 — NVMe Runtime Power Management
+# ----------------------------------------------------------------------------
+#
+#  Enable APST (Autonomous Power State Transitions) on NVMe SSDs.
+#  This allows the drive to enter low-power states between I/O bursts.
+#
+ACTION=="add", SUBSYSTEM=="nvme", \
+    RUN+="/usr/bin/logger -t devshakti-power 'NVMe device detected — APST managed by kernel'"
+
+
+# ============================================================================
+#  DevShakti OS — End of udev Power Rules
+# ============================================================================
+#
+#  Reload rules after editing:
+#    $ sudo udevadm control --reload-rules
+#    $ sudo udevadm trigger
+#
+#  Monitor rule firing in real-time:
+#    $ sudo udevadm monitor --environment --udev
+#
+#  Test a specific rule:
+#    $ sudo udevadm test /sys/class/power_supply/ADP1
+#
+# ============================================================================

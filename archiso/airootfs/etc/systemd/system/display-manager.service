@@ -1,0 +1,5 @@
+# DevShakti OS — Display Manager Service
+# NOTE: This file is a PLACEHOLDER.
+# On the actual Linux system, this must be a symlink:
+#   /etc/systemd/system/display-manager.service -> /usr/lib/systemd/system/sddm.service
+# Run setup-symlinks.sh during the build process to create this symlink.

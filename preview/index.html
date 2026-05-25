@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DevShakti OS — A premium, performance-optimized Linux desktop experience. Preview the look and feel in your browser.">
+  <title>DevShakti OS — Desktop Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ═══════════════ WALLPAPER ═══════════════ -->
+  <div id="wallpaper">
+    <svg id="wallpaper-waves" viewBox="0 0 1440 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#A8D0E6"/>
+          <stop offset="50%" stop-color="#B8D9EB"/>
+          <stop offset="100%" stop-color="#C5E1F0"/>
+        </linearGradient>
+        <linearGradient id="wave1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(74,155,217,0.15)"/>
+          <stop offset="100%" stop-color="rgba(74,155,217,0.05)"/>
+        </linearGradient>
+        <linearGradient id="wave2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.08)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0.18)"/>
+        </linearGradient>
+        <linearGradient id="wave3Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(74,155,217,0.08)"/>
+          <stop offset="100%" stop-color="rgba(168,208,230,0.12)"/>
+        </linearGradient>
+      </defs>
+      <rect width="1440" height="900" fill="url(#bgGrad)"/>
+      <path class="wave wave-1" d="M0,600 C200,550 400,700 720,620 C1040,540 1200,680 1440,600 L1440,900 L0,900 Z" fill="url(#wave1Grad)"/>
+      <path class="wave wave-2" d="M0,700 C360,640 600,780 900,700 C1200,620 1320,740 1440,700 L1440,900 L0,900 Z" fill="url(#wave2Grad)"/>
+      <path class="wave wave-3" d="M0,780 C240,740 480,820 720,770 C960,720 1200,800 1440,760 L1440,900 L0,900 Z" fill="url(#wave3Grad)"/>
+      <!-- Subtle circle accents -->
+      <circle cx="200" cy="200" r="180" fill="rgba(255,255,255,0.04)"/>
+      <circle cx="1200" cy="350" r="250" fill="rgba(74,155,217,0.04)"/>
+      <circle cx="700" cy="150" r="120" fill="rgba(255,255,255,0.03)"/>
+    </svg>
+  </div>
+
+  <!-- ═══════════════ TOP MENU BAR ═══════════════ -->
+  <header id="menu-bar">
+    <div class="menu-bar-left">
+      <span class="menu-logo" id="menuLogo">⚡</span>
+      <span class="menu-app-name">DevShakti</span>
+      <span class="menu-item">File</span>
+      <span class="menu-item">Edit</span>
+      <span class="menu-item">View</span>
+      <span class="menu-item">Help</span>
+    </div>
+    <div class="menu-bar-right">
+      <span class="menu-icon" id="searchIcon" title="Search">🔍</span>
+      <span class="menu-icon" title="WiFi">📶</span>
+      <span class="menu-icon" title="Volume">🔊</span>
+      <span class="menu-icon" title="Battery">🔋</span>
+      <span class="menu-date" id="menuDate"></span>
+      <span class="menu-clock" id="menuClock"></span>
+    </div>
+  </header>
+
+  <!-- ═══════════════ DESKTOP ═══════════════ -->
+  <main id="desktop" oncontextmenu="return false;">
+    <!-- Desktop Icons -->
+    <div class="desktop-icons">
+      <div class="desktop-icon" data-window="files" ondblclick="openWindow('files')">
+        <div class="desktop-icon-img">📁</div>
+        <span class="desktop-icon-label">Files</span>
+      </div>
+      <div class="desktop-icon" data-window="terminal" ondblclick="openWindow('terminal')">
+        <div class="desktop-icon-img">💻</div>
+        <span class="desktop-icon-label">Terminal</span>
+      </div>
+      <div class="desktop-icon" data-window="firefox" ondblclick="openWindow('firefox')">
+        <div class="desktop-icon-img">🌐</div>
+        <span class="desktop-icon-label">Firefox</span>
+      </div>
+      <div class="desktop-icon" data-window="settings" ondblclick="openWindow('settings')">
+        <div class="desktop-icon-img">⚙️</div>
+        <span class="desktop-icon-label">Settings</span>
+      </div>
+      <div class="desktop-icon" data-window="winapps" ondblclick="openWindow('winapps')">
+        <div class="desktop-icon-img">🪟</div>
+        <span class="desktop-icon-label">Windows Apps</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════ WINDOWS ═══════════════ -->
+
+    <!-- File Manager Window -->
+    <div class="window" id="window-files" data-window-id="files">
+      <div class="window-titlebar" data-draggable="true">
+        <div class="traffic-lights">
+          <button class="tl-btn tl-close" onclick="closeWindow('files')" title="Close">
+            <span class="tl-icon">✕</span>
+          </button>
+          <button class="tl-btn tl-minimize" onclick="minimizeWindow('files')" title="Minimize">
+            <span class="tl-icon">−</span>
+          </button>
+          <button class="tl-btn tl-maximize" onclick="maximizeWindow('files')" title="Maximize">
+            <span class="tl-icon">+</span>
+          </button>
+        </div>
+        <span class="window-title">📁 Dolphin — File Manager</span>
+      </div>
+      <div class="window-toolbar">
+        <button class="toolbar-btn">← Back</button>
+        <button class="toolbar-btn">→ Forward</button>
+        <button class="toolbar-btn">↑ Up</button>
+        <div class="toolbar-path">
+          <span class="path-segment" id="files-path">/home/user</span>
+        </div>
+        <button class="toolbar-btn">🔍</button>
+      </div>
+      <div class="window-body window-body-split">
+        <div class="file-sidebar">
+          <div class="sidebar-section">Places</div>
+          <div class="sidebar-item active" data-folder="home" onclick="navigateFolder(this, 'home')">🏠 Home</div>
+          <div class="sidebar-item" data-folder="desktop" onclick="navigateFolder(this, 'desktop')">🖥️ Desktop</div>
+          <div class="sidebar-item" data-folder="documents" onclick="navigateFolder(this, 'documents')">📄 Documents</div>
+          <div class="sidebar-item" data-folder="downloads" onclick="navigateFolder(this, 'downloads')">⬇️ Downloads</div>
+          <div class="sidebar-item" data-folder="music" onclick="navigateFolder(this, 'music')">🎵 Music</div>
+          <div class="sidebar-item" data-folder="pictures" onclick="navigateFolder(this, 'pictures')">🖼️ Pictures</div>
+          <div class="sidebar-item" data-folder="videos" onclick="navigateFolder(this, 'videos')">🎬 Videos</div>
+          <div class="sidebar-section">Devices</div>
+          <div class="sidebar-item" data-folder="root" onclick="navigateFolder(this, 'root')">💾 Root (/)</div>
+          <div class="sidebar-section">Network</div>
+          <div class="sidebar-item disabled">🌐 Network</div>
+        </div>
+        <div class="file-content" id="fileContent">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <div class="window-statusbar">
+        <span id="fileStatusLeft">8 items</span>
+        <span id="fileStatusRight">2.4 GB free</span>
+      </div>
+    </div>
+
+    <!-- Terminal Window -->
+    <div class="window" id="window-terminal" data-window-id="terminal">
+      <div class="window-titlebar window-titlebar-dark" data-draggable="true">
+        <div class="traffic-lights">
+          <button class="tl-btn tl-close" onclick="closeWindow('terminal')" title="Close">
+            <span class="tl-icon">✕</span>
+          </button>
+          <button class="tl-btn tl-minimize" onclick="minimizeWindow('terminal')" title="Minimize">
+            <span class="tl-icon">−</span>
+          </button>
+          <button class="tl-btn tl-maximize" onclick="maximizeWindow('terminal')" title="Maximize">
+            <span class="tl-icon">+</span>
+          </button>
+        </div>
+        <span class="window-title window-title-dark">💻 Konsole</span>
+      </div>
+      <div class="window-body terminal-body" id="terminalBody">
+        <div id="terminalOutput"></div>
+        <div class="terminal-input-line">
+          <span class="terminal-prompt">user@devshakti</span><span class="terminal-prompt-sep">:</span><span class="terminal-path">~</span><span class="terminal-prompt-dollar">$</span>
+          <span class="terminal-cursor">█</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Window -->
+    <div class="window" id="window-settings" data-window-id="settings">
+      <div class="window-titlebar" data-draggable="true">
+        <div class="traffic-lights">
+          <button class="tl-btn tl-close" onclick="closeWindow('settings')" title="Close">
+            <span class="tl-icon">✕</span>
+          </button>
+          <button class="tl-btn tl-minimize" onclick="minimizeWindow('settings')" title="Minimize">
+            <span class="tl-icon">−</span>
+          </button>
+          <button class="tl-btn tl-maximize" onclick="maximizeWindow('settings')" title="Maximize">
+            <span class="tl-icon">+</span>
+          </button>
+        </div>
+        <span class="window-title">⚙️ System Settings</span>
+      </div>
+      <div class="window-body window-body-split">
+        <div class="settings-sidebar">
+          <div class="settings-search">
+            <input type="text" placeholder="Search settings..." class="settings-search-input">
+          </div>
+          <div class="sidebar-section">Appearance</div>
+          <div class="sidebar-item active" data-settings="appearance" onclick="navigateSettings(this, 'appearance')">🎨 Global Theme</div>
+          <div class="sidebar-item" data-settings="colors" onclick="navigateSettings(this, 'colors')">🌈 Colors</div>
+          <div class="sidebar-item" data-settings="fonts" onclick="navigateSettings(this, 'fonts')">🔤 Fonts</div>
+          <div class="sidebar-item" data-settings="icons" onclick="navigateSettings(this, 'icons')">📦 Icons</div>
+          <div class="sidebar-section">Workspace</div>
+          <div class="sidebar-item" data-settings="desktop" onclick="navigateSettings(this, 'desktop')">🖥️ Desktop</div>
+          <div class="sidebar-item" data-settings="wallpaper" onclick="navigateSettings(this, 'wallpaper')">🖼️ Wallpaper</div>
+          <div class="sidebar-item" data-settings="effects" onclick="navigateSettings(this, 'effects')">✨ Desktop Effects</div>
+          <div class="sidebar-section">Hardware</div>
+          <div class="sidebar-item" data-settings="display" onclick="navigateSettings(this, 'display')">🖥️ Display</div>
+          <div class="sidebar-item" data-settings="audio" onclick="navigateSettings(this, 'audio')">🔊 Audio</div>
+          <div class="sidebar-item" data-settings="gpu" onclick="navigateSettings(this, 'gpu')">🎮 GPU</div>
+          <div class="sidebar-section">System</div>
+          <div class="sidebar-item" data-settings="about" onclick="navigateSettings(this, 'about')">ℹ️ About</div>
+          <div class="sidebar-item" data-settings="updates" onclick="navigateSettings(this, 'updates')">🔄 Updates</div>
+        </div>
+        <div class="settings-content" id="settingsContent">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Firefox Window -->
+    <div class="window" id="window-firefox" data-window-id="firefox">
+      <div class="window-titlebar" data-draggable="true">
+        <div class="traffic-lights">
+          <button class="tl-btn tl-close" onclick="closeWindow('firefox')" title="Close">
+            <span class="tl-icon">✕</span>
+          </button>
+          <button class="tl-btn tl-minimize" onclick="minimizeWindow('firefox')" title="Minimize">
+            <span class="tl-icon">−</span>
+          </button>
+          <button class="tl-btn tl-maximize" onclick="maximizeWindow('firefox')" title="Maximize">
+            <span class="tl-icon">+</span>
+          </button>
+        </div>
+        <span class="window-title">🌐 Firefox</span>
+      </div>
+      <div class="window-toolbar firefox-toolbar">
+        <button class="toolbar-btn">←</button>
+        <button class="toolbar-btn">→</button>
+        <button class="toolbar-btn">↻</button>
+        <div class="firefox-url-bar">
+          <span class="url-lock">🔒</span>
+          <span class="url-text">devshakti.org</span>
+        </div>
+        <button class="toolbar-btn">☰</button>
+      </div>
+      <div class="window-body firefox-body">
+        <div class="firefox-welcome">
+          <div class="firefox-logo">⚡</div>
+          <h1>Welcome to DevShakti OS</h1>
+          <p>Your premium Linux experience, optimized for gaming and development.</p>
+          <div class="firefox-search-box">
+            <input type="text" placeholder="Search with DuckDuckGo or enter address" class="firefox-search-input">
+          </div>
+          <div class="firefox-shortcuts">
+            <div class="firefox-shortcut">
+              <div class="shortcut-icon">📺</div>
+              <span>YouTube</span>
+            </div>
+            <div class="firefox-shortcut">
+              <div class="shortcut-icon">🐙</div>
+              <span>GitHub</span>
+            </div>
+            <div class="firefox-shortcut">
+              <div class="shortcut-icon">📰</div>
+              <span>Reddit</span>
+            </div>
+            <div class="firefox-shortcut">
+              <div class="shortcut-icon">📖</div>
+              <span>Arch Wiki</span>
+            </div>
+            <div class="firefox-shortcut">
+              <div class="shortcut-icon">🎮</div>
+              <span>ProtonDB</span>
+            </div>
+            <div class="firefox-shortcut">
+              <div class="shortcut-icon">💬</div>
+              <span>Discord</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Windows Apps Window -->
+    <div class="window" id="window-winapps" data-window-id="winapps">
+      <div class="window-titlebar" data-draggable="true">
+        <div class="traffic-lights">
+          <button class="tl-btn tl-close" onclick="closeWindow('winapps')" title="Close">
+            <span class="tl-icon">✕</span>
+          </button>
+          <button class="tl-btn tl-minimize" onclick="minimizeWindow('winapps')" title="Minimize">
+            <span class="tl-icon">−</span>
+          </button>
+          <button class="tl-btn tl-maximize" onclick="maximizeWindow('winapps')" title="Maximize">
+            <span class="tl-icon">+</span>
+          </button>
+        </div>
+        <span class="window-title">🪟 Windows Apps — Wine/Proton Manager</span>
+      </div>
+      <div class="window-body winapps-body">
+        <div class="winapps-header">
+          <h2>Windows Compatibility Layer</h2>
+          <p>Run Windows applications seamlessly on DevShakti OS</p>
+        </div>
+        <div class="winapps-grid">
+          <div class="winapp-card">
+            <div class="winapp-icon">🎮</div>
+            <div class="winapp-info">
+              <div class="winapp-name">Steam (Proton)</div>
+              <div class="winapp-status running">● Running</div>
+            </div>
+          </div>
+          <div class="winapp-card">
+            <div class="winapp-icon">📝</div>
+            <div class="winapp-info">
+              <div class="winapp-name">Microsoft Office</div>
+              <div class="winapp-status installed">● Installed</div>
+            </div>
+          </div>
+          <div class="winapp-card">
+            <div class="winapp-icon">🎨</div>
+            <div class="winapp-info">
+              <div class="winapp-name">Adobe Photoshop</div>
+              <div class="winapp-status installed">● Installed</div>
+            </div>
+          </div>
+          <div class="winapp-card">
+            <div class="winapp-icon">🎵</div>
+            <div class="winapp-info">
+              <div class="winapp-name">FL Studio</div>
+              <div class="winapp-status available">● Available</div>
+            </div>
+          </div>
+          <div class="winapp-card">
+            <div class="winapp-icon">💼</div>
+            <div class="winapp-info">
+              <div class="winapp-name">Visual Studio</div>
+              <div class="winapp-status available">● Available</div>
+            </div>
+          </div>
+          <div class="winapp-card">
+            <div class="winapp-icon">🗂️</div>
+            <div class="winapp-info">
+              <div class="winapp-name">7-Zip</div>
+              <div class="winapp-status installed">● Installed</div>
+            </div>
+          </div>
+        </div>
+        <div class="winapps-footer">
+          <div class="winapps-engine">
+            <span class="engine-label">Engine:</span>
+            <span class="engine-badge">Wine 9.0</span>
+            <span class="engine-badge">Proton 9.0-4</span>
+            <span class="engine-badge">DXVK 2.4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Store Window -->
+    <div class="window" id="window-appstore" data-window-id="appstore">
+      <div class="window-titlebar" data-draggable="true">
+        <div class="traffic-lights">
+          <button class="tl-btn tl-close" onclick="closeWindow('appstore')" title="Close">
+            <span class="tl-icon">✕</span>
+          </button>
+          <button class="tl-btn tl-minimize" onclick="minimizeWindow('appstore')" title="Minimize">
+            <span class="tl-icon">−</span>
+          </button>
+          <button class="tl-btn tl-maximize" onclick="maximizeWindow('appstore')" title="Maximize">
+            <span class="tl-icon">+</span>
+          </button>
+        </div>
+        <span class="window-title">🏪 DevShakti App Store</span>
+      </div>
+      <div class="window-body appstore-body">
+        <div class="appstore-hero">
+          <div class="appstore-hero-content">
+            <h2>Featured</h2>
+            <h1>DevShakti App Store</h1>
+            <p>Discover curated applications optimized for your system.</p>
+          </div>
+        </div>
+        <div class="appstore-categories">
+          <span class="appstore-cat active">All</span>
+          <span class="appstore-cat">Development</span>
+          <span class="appstore-cat">Gaming</span>
+          <span class="appstore-cat">Productivity</span>
+          <span class="appstore-cat">Creative</span>
+          <span class="appstore-cat">System</span>
+        </div>
+        <div class="appstore-grid">
+          <div class="appstore-card">
+            <div class="appstore-app-icon">📝</div>
+            <div class="appstore-app-name">VS Code</div>
+            <div class="appstore-app-desc">Code editor</div>
+            <button class="appstore-install-btn installed-btn">Installed</button>
+          </div>
+          <div class="appstore-card">
+            <div class="appstore-app-icon">🐙</div>
+            <div class="appstore-app-name">GitKraken</div>
+            <div class="appstore-app-desc">Git client</div>
+            <button class="appstore-install-btn">Install</button>
+          </div>
+          <div class="appstore-card">
+            <div class="appstore-app-icon">🐳</div>
+            <div class="appstore-app-name">Docker</div>
+            <div class="appstore-app-desc">Containers</div>
+            <button class="appstore-install-btn installed-btn">Installed</button>
+          </div>
+          <div class="appstore-card">
+            <div class="appstore-app-icon">🎮</div>
+            <div class="appstore-app-name">Lutris</div>
+            <div class="appstore-app-desc">Game manager</div>
+            <button class="appstore-install-btn installed-btn">Installed</button>
+          </div>
+          <div class="appstore-card">
+            <div class="appstore-app-icon">🎬</div>
+            <div class="appstore-app-name">OBS Studio</div>
+            <div class="appstore-app-desc">Streaming</div>
+            <button class="appstore-install-btn">Install</button>
+          </div>
+          <div class="appstore-card">
+            <div class="appstore-app-icon">🖌️</div>
+            <div class="appstore-app-name">GIMP</div>
+            <div class="appstore-app-desc">Image editor</div>
+            <button class="appstore-install-btn">Install</button>
+          </div>
+          <div class="appstore-card">
+            <div class="appstore-app-icon">🎵</div>
+            <div class="appstore-app-name">Spotify</div>
+            <div class="appstore-app-desc">Music</div>
+            <button class="appstore-install-btn">Install</button>
+          </div>
+          <div class="appstore-card">
+            <div class="appstore-app-icon">💬</div>
+            <div class="appstore-app-name">Discord</div>
+            <div class="appstore-app-desc">Chat</div>
+            <button class="appstore-install-btn installed-btn">Installed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════ DOCK ═══════════════ -->
+  <nav id="dock">
+    <div class="dock-container" id="dockContainer">
+      <div class="dock-item" data-window="files" onclick="openWindow('files')" title="Dolphin — Files">
+        <div class="dock-icon">📁</div>
+        <div class="dock-indicator" data-indicator="files"></div>
+      </div>
+      <div class="dock-item" data-window="terminal" onclick="openWindow('terminal')" title="Konsole — Terminal">
+        <div class="dock-icon">💻</div>
+        <div class="dock-indicator" data-indicator="terminal"></div>
+      </div>
+      <div class="dock-item" data-window="firefox" onclick="openWindow('firefox')" title="Firefox">
+        <div class="dock-icon">🌐</div>
+        <div class="dock-indicator" data-indicator="firefox"></div>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-item" data-window="editor" onclick="openWindow('terminal')" title="Kate — Editor">
+        <div class="dock-icon">✏️</div>
+        <div class="dock-indicator"></div>
+      </div>
+      <div class="dock-item" data-window="settings" onclick="openWindow('settings')" title="System Settings">
+        <div class="dock-icon">⚙️</div>
+        <div class="dock-indicator" data-indicator="settings"></div>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-item" data-window="steam" onclick="openWindow('winapps')" title="Steam">
+        <div class="dock-icon">🎮</div>
+        <div class="dock-indicator"></div>
+      </div>
+      <div class="dock-item" data-window="lutris" onclick="openWindow('winapps')" title="Lutris">
+        <div class="dock-icon">🕹️</div>
+        <div class="dock-indicator"></div>
+      </div>
+      <div class="dock-item" data-window="winapps" onclick="openWindow('winapps')" title="Windows Apps">
+        <div class="dock-icon">🪟</div>
+        <div class="dock-indicator" data-indicator="winapps"></div>
+      </div>
+      <div class="dock-divider"></div>
+      <div class="dock-item" data-window="appstore" onclick="openWindow('appstore')" title="App Store">
+        <div class="dock-icon">🏪</div>
+        <div class="dock-indicator" data-indicator="appstore"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════ CONTEXT MENU ═══════════════ -->
+  <div id="contextMenu" class="context-menu">
+    <div class="context-item" onclick="handleContextAction('wallpaper')">🖼️ Change Wallpaper</div>
+    <div class="context-item" onclick="handleContextAction('refresh')">🔄 Refresh Desktop</div>
+    <div class="context-divider"></div>
+    <div class="context-item" onclick="handleContextAction('display')">🖥️ Display Settings</div>
+    <div class="context-item" onclick="handleContextAction('terminal')">💻 Open Terminal</div>
+    <div class="context-divider"></div>
+    <div class="context-item" onclick="handleContextAction('about')">ℹ️ About DevShakti</div>
+  </div>
+
+  <!-- ═══════════════ ABOUT MODAL ═══════════════ -->
+  <div id="aboutOverlay" class="modal-overlay">
+    <div class="about-modal">
+      <div class="about-close" onclick="closeAboutModal()">✕</div>
+      <div class="about-logo">⚡</div>
+      <h1 class="about-title">DevShakti OS</h1>
+      <p class="about-version">Version 1.0 "Indra"</p>
+      <div class="about-divider"></div>
+      <div class="about-info">
+        <div class="about-row"><span class="about-label">Base</span><span class="about-value">Arch Linux (Rolling)</span></div>
+        <div class="about-row"><span class="about-label">Kernel</span><span class="about-value">6.12-zen1</span></div>
+        <div class="about-row"><span class="about-label">Desktop</span><span class="about-value">KDE Plasma 6.2</span></div>
+        <div class="about-row"><span class="about-label">Theme</span><span class="about-value">DevShakti Blue</span></div>
+        <div class="about-row"><span class="about-label">CPU</span><span class="about-value">AMD Ryzen 7 7445HS</span></div>
+        <div class="about-row"><span class="about-label">GPU</span><span class="about-value">Radeon 760M / RTX 4050</span></div>
+        <div class="about-row"><span class="about-label">RAM</span><span class="about-value">16 GB DDR5</span></div>
+        <div class="about-row"><span class="about-label">Graphics</span><span class="about-value">Vulkan 1.3 / OpenGL 4.6</span></div>
+        <div class="about-row"><span class="about-label">Wine</span><span class="about-value">9.0 + DXVK 2.4</span></div>
+      </div>
+      <div class="about-footer">
+        <p>Built for performance. Designed for developers & gamers.</p>
+        <p class="about-copy">© 2026 DevShakti Project</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

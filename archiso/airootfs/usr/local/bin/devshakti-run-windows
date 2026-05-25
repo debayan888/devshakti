@@ -1,0 +1,480 @@
+#!/usr/bin/env bash
+# ============================================================================
+# DevShakti OS — Windows Application Launcher
+# ============================================================================
+# File:        devshakti-run-windows
+# Location:    /usr/local/bin/devshakti-run-windows
+# Description: Run Windows executables (.exe, .msi, .bat, .lnk) seamlessly
+#              on DevShakti OS using Wine with DXVK and VKD3D-Proton.
+#              Supports NVIDIA/AMD GPU offloading, drag-and-drop from Dolphin,
+#              custom Wine prefixes, installation mode, and rich desktop
+#              notifications.
+#
+# Hardware Target: HP Victus 15 — AMD Ryzen 7 7445HS / Radeon 760M iGPU /
+#                  NVIDIA GeForce RTX 4050 dGPU
+#
+# Copyright © 2026 DevShakti Project — All rights reserved.
+# License: GPL-3.0-or-later
+# ============================================================================
+
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Constants & Defaults
+# ---------------------------------------------------------------------------
+readonly SCRIPT_NAME="devshakti-run-windows"
+readonly SCRIPT_VERSION="1.0.0"
+readonly LOG_DIR="${HOME}/.local/share/devshakti"
+readonly LOG_FILE="${LOG_DIR}/wine-launcher.log"
+readonly DEFAULT_PREFIX="${HOME}/.wine-devshakti"
+readonly SETUP_SCRIPT="/usr/local/bin/devshakti-wine-setup"
+readonly NOTIFICATION_ICON="wine"
+readonly SUPPORTED_EXTENSIONS="exe|msi|bat|lnk"
+
+# ---------------------------------------------------------------------------
+# Runtime State (mutable)
+# ---------------------------------------------------------------------------
+FILE_PATH=""
+WINE_PREFIX="${DEFAULT_PREFIX}"
+GPU_MODE="auto"          # auto | nvidia | amd
+INSTALL_MODE=false
+IS_GAME=false
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+_init_logging() {
+    mkdir -p "${LOG_DIR}"
+    touch "${LOG_FILE}"
+}
+
+log() {
+    local level="$1"; shift
+    local timestamp
+    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
+    printf '[%s] [%s] %s\n' "${timestamp}" "${level}" "$*" >> "${LOG_FILE}"
+}
+
+log_info()  { log "INFO"  "$@"; }
+log_warn()  { log "WARN"  "$@"; }
+log_error() { log "ERROR" "$@"; }
+
+# ---------------------------------------------------------------------------
+# Notifications — desktop toast via notify-send
+# ---------------------------------------------------------------------------
+notify() {
+    local urgency="${1:-normal}"  # low | normal | critical
+    local title="$2"
+    local body="${3:-}"
+    notify-send --urgency="${urgency}" \
+                --icon="${NOTIFICATION_ICON}" \
+                --app-name="DevShakti Wine" \
+                "${title}" "${body}" 2>/dev/null || true
+}
+
+notify_error() {
+    notify "critical" "DevShakti Wine — Error" "$1"
+    log_error "$1"
+}
+
+# ---------------------------------------------------------------------------
+# Usage / Help
+# ---------------------------------------------------------------------------
+show_help() {
+    cat <<EOF
+${SCRIPT_NAME} v${SCRIPT_VERSION} — DevShakti Windows Application Launcher
+
+USAGE:
+    ${SCRIPT_NAME} [OPTIONS] <file.exe|file.msi|file.bat|file.lnk>
+
+DESCRIPTION:
+    Run or install Windows applications and games on DevShakti OS via Wine
+    with automatic DXVK / VKD3D-Proton integration and hybrid GPU support.
+
+OPTIONS:
+    --install           Install the application (uses 'wine start /wait').
+    --gpu=MODE          GPU selection: nvidia | amd | auto (default: auto).
+                          • nvidia — force NVIDIA RTX 4050 via prime-run.
+                          • amd    — force AMD Radeon 760M iGPU.
+                          • auto   — auto-detect; prefer dGPU for games.
+    --prefix=PATH       Custom Wine prefix directory.
+                        Default: ${DEFAULT_PREFIX}
+    --help, -h          Show this help message.
+
+EXAMPLES:
+    ${SCRIPT_NAME} ~/Downloads/setup.exe
+    ${SCRIPT_NAME} --install ~/Downloads/app-installer.msi
+    ${SCRIPT_NAME} --gpu=nvidia ~/Games/game.exe
+    ${SCRIPT_NAME} --prefix=~/wine-prefixes/office ~/Office/word.exe
+
+DRAG-AND-DROP:
+    Supported via Dolphin file manager — simply drop a .exe / .msi / .bat /
+    .lnk file onto the DevShakti Wine launcher icon or use the right-click
+    context menu.
+
+LOG FILE:
+    ${LOG_FILE}
+
+EOF
+    exit 0
+}
+
+# ---------------------------------------------------------------------------
+# Argument Parsing
+# ---------------------------------------------------------------------------
+parse_args() {
+    if [[ $# -eq 0 ]]; then
+        show_help
+    fi
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --help|-h)
+                show_help
+                ;;
+            --install)
+                INSTALL_MODE=true
+                shift
+                ;;
+            --gpu=*)
+                GPU_MODE="${1#--gpu=}"
+                if [[ ! "${GPU_MODE}" =~ ^(nvidia|amd|auto)$ ]]; then
+                    notify_error "Invalid GPU mode '${GPU_MODE}'. Use nvidia, amd, or auto."
+                    exit 1
+                fi
+                shift
+                ;;
+            --prefix=*)
+                WINE_PREFIX="${1#--prefix=}"
+                shift
+                ;;
+            -*)
+                notify_error "Unknown option: $1. Use --help for usage."
+                exit 1
+                ;;
+            *)
+                # Positional argument — treat as file path
+                FILE_PATH="$1"
+                shift
+                ;;
+        esac
+    done
+
+    # Validate that a file was provided
+    if [[ -z "${FILE_PATH}" ]]; then
+        notify_error "No file specified. Pass a .exe, .msi, .bat, or .lnk file."
+        exit 1
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# File Validation
+# ---------------------------------------------------------------------------
+validate_file() {
+    # Resolve symlinks and relative paths
+    FILE_PATH="$(realpath -- "${FILE_PATH}" 2>/dev/null || echo "${FILE_PATH}")"
+
+    if [[ ! -f "${FILE_PATH}" ]]; then
+        notify_error "File not found: ${FILE_PATH}"
+        exit 1
+    fi
+
+    # Check extension
+    local ext="${FILE_PATH##*.}"
+    ext="${ext,,}"  # lowercase
+
+    if [[ ! "${ext}" =~ ^(${SUPPORTED_EXTENSIONS})$ ]]; then
+        notify_error "Unsupported file type '.${ext}'. Supported: .exe, .msi, .bat, .lnk"
+        exit 1
+    fi
+
+    log_info "Validated file: ${FILE_PATH} (type: .${ext})"
+}
+
+# ---------------------------------------------------------------------------
+# Game Detection Heuristic
+# ---------------------------------------------------------------------------
+# We use multiple signals to guess whether the target is a game:
+#   1. Path patterns (e.g., contains "game", "steam", "GOG")
+#   2. File size > 50 MB (games tend to be large)
+#   3. Presence of DirectX/Vulkan-related DLLs alongside the exe
+#   4. File metadata via the 'file' command (PE subsystem)
+# ---------------------------------------------------------------------------
+detect_game() {
+    IS_GAME=false
+    local file_lower="${FILE_PATH,,}"
+    local dir
+    dir="$(dirname "${FILE_PATH}")"
+
+    # --- Signal 1: Path patterns ---
+    local game_patterns="game|steam|gog|epic|origin|uplay|battle\.net|blizzard|riot|valorant|fortnite|minecraft|retro|emulat"
+    if echo "${file_lower}" | grep -qiE "${game_patterns}"; then
+        IS_GAME=true
+        log_info "Game detected via path pattern."
+        return
+    fi
+
+    # --- Signal 2: Large file size (> 50 MB) ---
+    local size_bytes
+    size_bytes="$(stat -c '%s' "${FILE_PATH}" 2>/dev/null || echo 0)"
+    if (( size_bytes > 52428800 )); then
+        IS_GAME=true
+        log_info "Game detected via file size (${size_bytes} bytes)."
+        return
+    fi
+
+    # --- Signal 3: DirectX / Vulkan DLLs in the same directory ---
+    local dx_dlls=("d3d9.dll" "d3d10.dll" "d3d11.dll" "d3d12.dll" "dxgi.dll"
+                   "vulkan-1.dll" "xinput1_3.dll" "xinput1_4.dll"
+                   "opengl32.dll" "bink2w64.dll" "steam_api.dll" "steam_api64.dll")
+    for dll in "${dx_dlls[@]}"; do
+        if [[ -f "${dir}/${dll}" ]] || [[ -f "${dir}/${dll^}" ]]; then
+            IS_GAME=true
+            log_info "Game detected via adjacent DLL: ${dll}"
+            return
+        fi
+    done
+
+    # --- Signal 4: PE metadata (GUI subsystem is a weak positive) ---
+    if command -v file &>/dev/null; then
+        local file_info
+        file_info="$(file "${FILE_PATH}" 2>/dev/null || true)"
+        if echo "${file_info}" | grep -qi "GUI"; then
+            # GUI alone isn't conclusive, but combined with other factors
+            # we treat it as a hint. We only set IS_GAME if size > 20 MB too.
+            if (( size_bytes > 20971520 )); then
+                IS_GAME=true
+                log_info "Game detected via PE GUI subsystem + size heuristic."
+                return
+            fi
+        fi
+    fi
+
+    log_info "File classified as application (not a game)."
+}
+
+# ---------------------------------------------------------------------------
+# Wine Prefix Setup — ensure prefix exists and DXVK/VKD3D are installed
+# ---------------------------------------------------------------------------
+ensure_prefix() {
+    if [[ ! -d "${WINE_PREFIX}/drive_c" ]]; then
+        log_info "Wine prefix not found at ${WINE_PREFIX}. Running first-time setup…"
+
+        if [[ -x "${SETUP_SCRIPT}" ]]; then
+            # Show a zenity pulsating progress bar during setup
+            (
+                "${SETUP_SCRIPT}" --prefix="${WINE_PREFIX}" 2>&1 | \
+                    tee -a "${LOG_FILE}"
+            ) | zenity --progress --pulsate --no-cancel --auto-close \
+                       --title="DevShakti Wine Setup" \
+                       --text="Preparing Wine environment for the first time…\nThis may take a few minutes." \
+                       --width=420 2>/dev/null || true
+
+            if [[ ! -d "${WINE_PREFIX}/drive_c" ]]; then
+                notify_error "Wine setup failed. Check ${LOG_FILE} for details."
+                exit 1
+            fi
+        else
+            # Fallback: create a minimal prefix with Wine
+            log_warn "Setup script not found. Creating minimal prefix."
+            WINEPREFIX="${WINE_PREFIX}" wine wineboot --init 2>&1 | tee -a "${LOG_FILE}" || true
+        fi
+
+        notify "normal" "DevShakti Wine" "Wine environment is ready."
+        log_info "Wine prefix ready at ${WINE_PREFIX}."
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# GPU Environment — configure NVIDIA / AMD offloading
+# ---------------------------------------------------------------------------
+setup_gpu_env() {
+    # Build the GPU wrapper command (may be empty for iGPU)
+    GPU_CMD=()
+
+    case "${GPU_MODE}" in
+        nvidia)
+            _setup_nvidia
+            ;;
+        amd)
+            _setup_amd
+            ;;
+        auto)
+            if ${IS_GAME}; then
+                # Games default to NVIDIA dGPU if available
+                if _nvidia_available; then
+                    _setup_nvidia
+                else
+                    _setup_amd
+                fi
+            else
+                # Applications default to iGPU for power efficiency
+                _setup_amd
+            fi
+            ;;
+    esac
+
+    log_info "GPU mode: ${GPU_MODE} | GPU_CMD: ${GPU_CMD[*]:-<none>}"
+}
+
+_nvidia_available() {
+    # Check if NVIDIA GPU is accessible (driver loaded)
+    if command -v nvidia-smi &>/dev/null && nvidia-smi &>/dev/null; then
+        return 0
+    fi
+    if [[ -d /proc/driver/nvidia ]]; then
+        return 0
+    fi
+    return 1
+}
+
+_setup_nvidia() {
+    if command -v prime-run &>/dev/null; then
+        GPU_CMD=(prime-run)
+        log_info "Using prime-run for NVIDIA offload."
+    else
+        # Manual PRIME offload environment variables
+        export __NV_PRIME_RENDER_OFFLOAD=1
+        export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+        export __GLX_VENDOR_LIBRARY_NAME=nvidia
+        export __VK_LAYER_NV_optimus=NVIDIA_only
+        export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/nvidia_icd.json"
+        log_info "NVIDIA PRIME offload configured via environment variables."
+    fi
+}
+
+_setup_amd() {
+    # Force the AMD Radeon 760M iGPU
+    export DRI_PRIME=0
+    export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/radeon_icd.x86_64.json:/usr/share/vulkan/icd.d/radeon_icd.i686.json"
+    log_info "AMD iGPU selected (DRI_PRIME=0)."
+}
+
+# ---------------------------------------------------------------------------
+# Wine Environment Variables
+# ---------------------------------------------------------------------------
+setup_wine_env() {
+    export WINEPREFIX="${WINE_PREFIX}"
+
+    # DXVK & VKD3D-Proton DLL overrides — native versions take priority
+    export WINEDLLOVERRIDES="d3d9=n;d3d10=n;d3d10_1=n;d3d10core=n;d3d11=n;d3d12=n;d3d12core=n;dxgi=n"
+
+    # Enable Esync/Fsync for lower-latency synchronization (kernel support needed)
+    export WINEESYNC=1
+    export WINEFSYNC=1
+
+    # DXVK HUD — disabled by default (set to "fps" for FPS counter)
+    export DXVK_HUD="${DXVK_HUD:-0}"
+
+    # Vulkan / Mesa optimizations
+    export MESA_GL_VERSION_OVERRIDE="4.6"
+    export MESA_GLSL_VERSION_OVERRIDE="460"
+    export mesa_glthread=true
+
+    # Logging level for Wine (reduce noise)
+    export WINEDEBUG="-all"
+
+    log_info "Wine environment configured: WINEPREFIX=${WINEPREFIX}"
+}
+
+# ---------------------------------------------------------------------------
+# Launch Application
+# ---------------------------------------------------------------------------
+launch() {
+    local filename
+    filename="$(basename "${FILE_PATH}")"
+    local ext="${filename##*.}"
+    ext="${ext,,}"
+
+    log_info "Launching: ${FILE_PATH} (install=${INSTALL_MODE}, game=${IS_GAME}, gpu=${GPU_MODE})"
+
+    # Show a brief splash notification
+    notify "low" "DevShakti Wine" "Starting ${filename}…"
+
+    # Build the Wine command
+    local wine_cmd=()
+
+    # Prepend GPU wrapper if needed
+    if [[ ${#GPU_CMD[@]} -gt 0 ]]; then
+        wine_cmd+=("${GPU_CMD[@]}")
+    fi
+
+    if ${INSTALL_MODE}; then
+        # Installation mode — use 'wine start /wait' for MSI and EXE installers
+        case "${ext}" in
+            msi)
+                wine_cmd+=(wine msiexec /i "${FILE_PATH}")
+                ;;
+            exe|bat)
+                wine_cmd+=(wine start /wait "${FILE_PATH}")
+                ;;
+            lnk)
+                wine_cmd+=(wine start /wait "${FILE_PATH}")
+                ;;
+        esac
+    else
+        # Normal run mode
+        case "${ext}" in
+            msi)
+                wine_cmd+=(wine msiexec /i "${FILE_PATH}")
+                ;;
+            bat)
+                wine_cmd+=(wine cmd /c "${FILE_PATH}")
+                ;;
+            lnk|exe)
+                wine_cmd+=(wine "${FILE_PATH}")
+                ;;
+        esac
+    fi
+
+    log_info "Executing: ${wine_cmd[*]}"
+
+    # Show a zenity progress spinner while the application starts
+    # We run Wine in the background and close the spinner after 4 seconds
+    (
+        sleep 4
+    ) | zenity --progress --pulsate --no-cancel --auto-close \
+               --title="DevShakti Wine" \
+               --text="Launching ${filename}…" \
+               --width=360 2>/dev/null &
+    local zenity_pid=$!
+
+    # Run the application
+    local exit_code=0
+    "${wine_cmd[@]}" >> "${LOG_FILE}" 2>&1 || exit_code=$?
+
+    # Kill the zenity spinner if still running
+    kill "${zenity_pid}" 2>/dev/null || true
+    wait "${zenity_pid}" 2>/dev/null || true
+
+    # Report result
+    if [[ ${exit_code} -eq 0 ]]; then
+        log_info "Application exited successfully: ${filename}"
+        notify "low" "DevShakti Wine" "${filename} has closed."
+    else
+        log_error "Application exited with code ${exit_code}: ${filename}"
+        notify "critical" "DevShakti Wine — Error" \
+            "${filename} exited with error code ${exit_code}.\nCheck the log: ${LOG_FILE}"
+    fi
+
+    return ${exit_code}
+}
+
+# ---------------------------------------------------------------------------
+# Main Entry Point
+# ---------------------------------------------------------------------------
+main() {
+    _init_logging
+    log_info "====== ${SCRIPT_NAME} v${SCRIPT_VERSION} invoked ======"
+    log_info "Arguments: $*"
+
+    parse_args "$@"
+    validate_file
+    detect_game
+    ensure_prefix
+    setup_wine_env
+    setup_gpu_env
+    launch
+}
+
+main "$@"

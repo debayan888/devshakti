@@ -1,0 +1,196 @@
+# ============================================================================
+# DevShakti OS — Package List (x86_64)
+# ============================================================================
+# Complete list of packages to include in the DevShakti OS live/install ISO.
+# Organized by category for maintainability.
+#
+# Copyright (c) 2026 DevShakti Project
+# SPDX-License-Identifier: MIT
+# ============================================================================
+
+# ─── Base System ─────────────────────────────────────────────────────────────
+base
+linux-zen
+linux-zen-headers
+linux-firmware
+amd-ucode
+dkms
+mkinitcpio
+sudo
+nano
+vim
+git
+wget
+curl
+base-devel
+networkmanager
+bluez
+bluez-utils
+pipewire
+pipewire-alsa
+pipewire-pulse
+pipewire-jack
+wireplumber
+zsh
+fish
+openssh
+reflector
+pacman-contrib
+
+# ─── Boot & Display Manager ─────────────────────────────────────────────────
+grub
+efibootmgr
+os-prober
+plymouth
+sddm
+sddm-kcm
+
+# ─── KDE Plasma Desktop ─────────────────────────────────────────────────────
+plasma-meta
+plasma-wayland-session
+kde-applications-meta
+kvantum
+xdg-desktop-portal-kde
+dolphin
+konsole
+kate
+ark
+spectacle
+gwenview
+okular
+elisa
+partitionmanager
+
+# ─── Xorg / Wayland ─────────────────────────────────────────────────────────
+xorg-server
+xorg-xinit
+xorg-xrandr
+xorg-xdpyinfo
+wayland
+
+# ─── AMD GPU (Radeon 760M iGPU) ─────────────────────────────────────────────
+mesa
+lib32-mesa
+vulkan-radeon
+lib32-vulkan-radeon
+xf86-video-amdgpu
+libva-mesa-driver
+lib32-libva-mesa-driver
+mesa-vdpau
+lib32-mesa-vdpau
+
+# ─── NVIDIA GPU (RTX 4050 dGPU) ─────────────────────────────────────────────
+nvidia-open-dkms
+nvidia-utils
+lib32-nvidia-utils
+nvidia-settings
+opencl-nvidia
+lib32-opencl-nvidia
+
+# ─── Vulkan Common ──────────────────────────────────────────────────────────
+vulkan-icd-loader
+lib32-vulkan-icd-loader
+vulkan-tools
+
+# ─── Wine & Gaming ──────────────────────────────────────────────────────────
+wine-staging
+wine-gecko
+wine-mono
+winetricks
+vkd3d
+steam
+gamemode
+lib32-gamemode
+mangohud
+lib32-mangohud
+goverlay
+lutris
+
+# ─── Power Management ───────────────────────────────────────────────────────
+tlp
+tlp-rdw
+powertop
+thermald
+acpi
+acpid
+acpi_call-dkms
+
+# ─── Fonts ───────────────────────────────────────────────────────────────────
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+ttf-liberation
+ttf-dejavu
+ttf-fira-code
+ttf-roboto
+inter-font
+otf-font-awesome
+
+# ─── Multimedia ─────────────────────────────────────────────────────────────
+vlc
+ffmpeg
+gstreamer
+gst-plugins-base
+gst-plugins-good
+gst-plugins-bad
+gst-plugins-ugly
+gst-libav
+
+# ─── Utilities ───────────────────────────────────────────────────────────────
+firefox
+htop
+btop
+neofetch
+fastfetch
+p7zip
+unzip
+unrar
+flatpak
+fuse2
+ntfs-3g
+exfat-utils
+dosfstools
+gparted
+timeshift
+baobab
+file-roller
+
+# ─── Development ─────────────────────────────────────────────────────────────
+python
+python-pip
+nodejs
+npm
+gcc
+make
+cmake
+
+# ─── Networking ──────────────────────────────────────────────────────────────
+nmap
+traceroute
+bind-tools
+iwd
+wpa_supplicant
+
+# ─── archiso Required ───────────────────────────────────────────────────────
+# These packages are required by archiso for the live environment to function.
+arch-install-scripts
+memtest86+
+memtest86+-efi
+mtools
+nbd
+syslinux
+
+# ============================================================================
+# AUR Packages (built separately via build.sh — NOT available in official repos)
+# ============================================================================
+# These packages must be built from the AUR before the ISO is assembled.
+# The build script handles cloning, building, and injecting them into a
+# local custom repo automatically.
+#
+# AUR: whitesur-kde-theme-git
+# AUR: whitesur-icon-theme-git
+# AUR: whitesur-cursor-theme-git
+# AUR: whitesur-gtk-theme-git
+# AUR: kwin-effects-forceblur
+# AUR: protonup-qt
+# AUR: heroic-games-launcher-bin

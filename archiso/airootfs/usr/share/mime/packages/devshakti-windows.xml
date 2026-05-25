@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  DevShakti OS — Windows MIME Type Definitions
+  ============================================================================
+  File:        devshakti-windows.xml
+  Location:    /usr/share/mime/packages/devshakti-windows.xml
+  Description: Defines and reinforces MIME type associations for common
+               Windows executable formats so that they are recognized by
+               the XDG shared-mime-info system and routed to the DevShakti
+               Wine launcher.
+
+  After installing, run:  sudo update-mime-database /usr/share/mime
+
+  Copyright © 2026 DevShakti Project — All rights reserved.
+  License: GPL-3.0-or-later
+  ============================================================================
+-->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+
+  <!-- ===================================================================
+       Windows Executable (.exe)
+       Standard PE (Portable Executable) format used by Windows programs.
+       =================================================================== -->
+  <mime-type type="application/x-ms-dos-executable">
+    <comment>Windows Executable</comment>
+    <comment xml:lang="en">Windows Executable Program</comment>
+    <icon name="application-x-ms-dos-executable"/>
+    <glob pattern="*.exe" weight="60"/>
+    <!-- Magic bytes: MZ header (0x4D 0x5A) at offset 0 -->
+    <magic priority="60">
+      <match type="string" value="MZ" offset="0"/>
+    </magic>
+    <sub-class-of type="application/x-executable"/>
+  </mime-type>
+
+  <!-- ===================================================================
+       Windows Installer Package (.msi)
+       Microsoft Installer database stored as OLE Compound Document.
+       =================================================================== -->
+  <mime-type type="application/x-msi">
+    <comment>Windows Installer Package</comment>
+    <comment xml:lang="en">Microsoft Installer Package</comment>
+    <icon name="application-x-msi"/>
+    <glob pattern="*.msi" weight="60"/>
+    <!-- Magic bytes: OLE Compound Document header (0xD0CF11E0A1B11AE1) -->
+    <magic priority="60">
+      <match type="string" value="\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" offset="0"/>
+    </magic>
+  </mime-type>
+
+  <!-- ===================================================================
+       Windows Batch File (.bat)
+       Plain-text script executed by cmd.exe / Wine's cmd.
+       =================================================================== -->
+  <mime-type type="application/x-bat">
+    <comment>Windows Batch File</comment>
+    <comment xml:lang="en">Windows Batch Script</comment>
+    <icon name="text-x-script"/>
+    <glob pattern="*.bat" weight="50"/>
+    <glob pattern="*.cmd" weight="50"/>
+    <sub-class-of type="text/plain"/>
+  </mime-type>
+
+  <!-- ===================================================================
+       Windows Shortcut (.lnk)
+       Shell Link binary format pointing to a target executable or file.
+       =================================================================== -->
+  <mime-type type="application/x-ms-shortcut">
+    <comment>Windows Shortcut</comment>
+    <comment xml:lang="en">Windows Shell Link</comment>
+    <icon name="application-x-ms-shortcut"/>
+    <glob pattern="*.lnk" weight="60"/>
+    <!-- Magic bytes: Shell Link header CLSID (first 4 bytes: 0x4C000000) -->
+    <magic priority="60">
+      <match type="little32" value="0x0000004C" offset="0"/>
+    </magic>
+  </mime-type>
+
+</mime-info>

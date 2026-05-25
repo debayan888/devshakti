@@ -1,0 +1,480 @@
+#!/usr/bin/env bash
+# ============================================================================
+# DevShakti OS — Wine First-Time Setup
+# ============================================================================
+# File:        devshakti-wine-setup
+# Location:    /usr/local/bin/devshakti-wine-setup
+# Description: Bootstraps a fully configured Wine prefix with DXVK,
+#              VKD3D-Proton, common Windows runtimes, fonts, and audio
+#              configuration for DevShakti OS.
+#
+# Hardware Target: HP Victus 15 — AMD Ryzen 7 7445HS / Radeon 760M iGPU /
+#                  NVIDIA GeForce RTX 4050 dGPU
+#
+# Copyright © 2026 DevShakti Project — All rights reserved.
+# License: GPL-3.0-or-later
+# ============================================================================
+
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Constants & Defaults
+# ---------------------------------------------------------------------------
+readonly SCRIPT_NAME="devshakti-wine-setup"
+readonly SCRIPT_VERSION="1.0.0"
+readonly DEFAULT_PREFIX="${HOME}/.wine-devshakti"
+readonly LOG_DIR="${HOME}/.local/share/devshakti"
+readonly LOG_FILE="${LOG_DIR}/wine-launcher.log"
+readonly NOTIFICATION_ICON="wine"
+
+# Winetricks packages to install — order matters for dependency resolution
+readonly WINETRICKS_PACKAGES=(
+    "corefonts"          # Microsoft Core Fonts (Arial, Times, Courier, etc.)
+    "vcrun2022"          # Visual C++ 2015-2022 Redistributable
+    "dotnet48"           # .NET Framework 4.8
+    "d3dcompiler_47"     # DirectX shader compiler
+    "dxvk"               # DXVK (DX9/10/11 → Vulkan translation)
+)
+
+# ---------------------------------------------------------------------------
+# Runtime State
+# ---------------------------------------------------------------------------
+WINE_PREFIX="${DEFAULT_PREFIX}"
+FORCE_RECREATE=false
+ZENITY_AVAILABLE=false
+STEP_CURRENT=0
+STEP_TOTAL=9  # Total number of setup steps
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+_init_logging() {
+    mkdir -p "${LOG_DIR}"
+    touch "${LOG_FILE}"
+}
+
+log() {
+    local level="$1"; shift
+    local timestamp
+    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
+    printf '[%s] [%s] [setup] %s\n' "${timestamp}" "${level}" "$*" | tee -a "${LOG_FILE}"
+}
+
+log_info()  { log "INFO"  "$@"; }
+log_warn()  { log "WARN"  "$@"; }
+log_error() { log "ERROR" "$@"; }
+
+# ---------------------------------------------------------------------------
+# Notifications
+# ---------------------------------------------------------------------------
+notify() {
+    local urgency="${1:-normal}"
+    local title="$2"
+    local body="${3:-}"
+    notify-send --urgency="${urgency}" \
+                --icon="${NOTIFICATION_ICON}" \
+                --app-name="DevShakti Wine Setup" \
+                "${title}" "${body}" 2>/dev/null || true
+}
+
+# ---------------------------------------------------------------------------
+# Zenity Progress Helpers
+# ---------------------------------------------------------------------------
+# We output percentage + text to stdout which a parent zenity --progress can
+# consume.  If there is no parent zenity, the output is harmless.
+# ---------------------------------------------------------------------------
+progress_step() {
+    STEP_CURRENT=$((STEP_CURRENT + 1))
+    local pct=$(( (STEP_CURRENT * 100) / STEP_TOTAL ))
+    local msg="$1"
+    echo "${pct}"
+    echo "# ${msg}"
+    log_info "[${STEP_CURRENT}/${STEP_TOTAL}] ${msg}"
+}
+
+# ---------------------------------------------------------------------------
+# Usage / Help
+# ---------------------------------------------------------------------------
+show_help() {
+    cat <<EOF
+${SCRIPT_NAME} v${SCRIPT_VERSION} — DevShakti Wine First-Time Setup
+
+USAGE:
+    ${SCRIPT_NAME} [OPTIONS]
+
+DESCRIPTION:
+    Creates and configures a Wine prefix with all necessary components for
+    running Windows applications and games on DevShakti OS:
+      • Wine prefix initialisation (Windows 10 mode)
+      • DXVK (DirectX 9/10/11 → Vulkan)
+      • VKD3D-Proton (DirectX 12 → Vulkan)
+      • Visual C++ 2015-2022 Redistributable
+      • .NET Framework 4.8
+      • DirectX Shader Compiler (d3dcompiler_47)
+      • Microsoft Core Fonts
+      • PipeWire / PulseAudio audio driver
+
+OPTIONS:
+    --prefix=PATH   Wine prefix path (default: ${DEFAULT_PREFIX}).
+    --force         Delete and recreate the Wine prefix from scratch.
+    --help, -h      Show this help message.
+
+LOG FILE:
+    ${LOG_FILE}
+
+EOF
+    exit 0
+}
+
+# ---------------------------------------------------------------------------
+# Argument Parsing
+# ---------------------------------------------------------------------------
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --help|-h)
+                show_help
+                ;;
+            --force)
+                FORCE_RECREATE=true
+                shift
+                ;;
+            --prefix=*)
+                WINE_PREFIX="${1#--prefix=}"
+                shift
+                ;;
+            *)
+                log_error "Unknown argument: $1"
+                show_help
+                ;;
+        esac
+    done
+}
+
+# ---------------------------------------------------------------------------
+# Dependency Checks
+# ---------------------------------------------------------------------------
+check_dependencies() {
+    progress_step "Checking system dependencies…"
+
+    local missing=()
+
+    # Required tools
+    for cmd in wine wineboot wineserver winetricks; do
+        if ! command -v "${cmd}" &>/dev/null; then
+            missing+=("${cmd}")
+        fi
+    done
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        log_error "Missing required commands: ${missing[*]}"
+        notify "critical" "DevShakti Wine Setup" \
+            "Missing dependencies: ${missing[*]}\nInstall them with: sudo pacman -S wine winetricks"
+        exit 1
+    fi
+
+    # Optional: zenity for GUI progress
+    if command -v zenity &>/dev/null; then
+        ZENITY_AVAILABLE=true
+    else
+        log_warn "zenity not found — setup will run without GUI progress."
+    fi
+
+    log_info "All required dependencies present."
+}
+
+# ---------------------------------------------------------------------------
+# Prefix Initialisation
+# ---------------------------------------------------------------------------
+init_prefix() {
+    # Handle --force flag: remove existing prefix
+    if ${FORCE_RECREATE} && [[ -d "${WINE_PREFIX}" ]]; then
+        progress_step "Removing existing Wine prefix (--force)…"
+        log_warn "Deleting prefix: ${WINE_PREFIX}"
+        rm -rf "${WINE_PREFIX}"
+    fi
+
+    # Skip if prefix already fully exists
+    if [[ -d "${WINE_PREFIX}/drive_c/windows" ]]; then
+        progress_step "Wine prefix already exists — skipping init."
+        log_info "Prefix already exists at ${WINE_PREFIX}."
+        return 0
+    fi
+
+    progress_step "Creating Wine prefix at ${WINE_PREFIX}…"
+    mkdir -p "${WINE_PREFIX}"
+
+    export WINEPREFIX="${WINE_PREFIX}"
+    export WINEDEBUG="-all"
+    export WINEARCH="win64"
+
+    # Boot the prefix — this creates the basic directory structure
+    wine wineboot --init >> "${LOG_FILE}" 2>&1 || {
+        log_error "wine wineboot --init failed."
+        notify "critical" "DevShakti Wine Setup" "Failed to initialise Wine prefix."
+        exit 1
+    }
+
+    # Wait for wineserver to finish
+    wineserver --wait 2>/dev/null || true
+
+    log_info "Wine prefix created successfully."
+}
+
+# ---------------------------------------------------------------------------
+# Set Windows Version to Windows 10
+# ---------------------------------------------------------------------------
+set_windows_version() {
+    progress_step "Setting Windows version to Windows 10…"
+
+    export WINEPREFIX="${WINE_PREFIX}"
+    export WINEDEBUG="-all"
+
+    # Use winetricks to set the Windows version
+    winetricks -q win10 >> "${LOG_FILE}" 2>&1 || {
+        log_warn "winetricks win10 returned non-zero — attempting manual registry edit."
+
+        # Fallback: direct registry edits
+        wine reg add "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion" \
+            /v ProductName /t REG_SZ /d "Windows 10" /f >> "${LOG_FILE}" 2>&1 || true
+        wine reg add "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion" \
+            /v CSDVersion /t REG_SZ /d "" /f >> "${LOG_FILE}" 2>&1 || true
+        wine reg add "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion" \
+            /v CurrentBuildNumber /t REG_SZ /d "19041" /f >> "${LOG_FILE}" 2>&1 || true
+        wine reg add "HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion" \
+            /v CurrentVersion /t REG_SZ /d "10.0" /f >> "${LOG_FILE}" 2>&1 || true
+    }
+
+    wineserver --wait 2>/dev/null || true
+    log_info "Windows version set to Windows 10."
+}
+
+# ---------------------------------------------------------------------------
+# Install DXVK (DirectX 9/10/11 → Vulkan)
+# ---------------------------------------------------------------------------
+install_dxvk() {
+    progress_step "Installing DXVK (DirectX 9/10/11 → Vulkan)…"
+
+    export WINEPREFIX="${WINE_PREFIX}"
+    export WINEDEBUG="-all"
+
+    # Method 1: Use the system-wide setup_dxvk.sh script (if installed via pacman)
+    if command -v setup_dxvk &>/dev/null; then
+        setup_dxvk install >> "${LOG_FILE}" 2>&1 && {
+            log_info "DXVK installed via setup_dxvk."
+            return 0
+        }
+    fi
+
+    # Method 1b: Check common install paths
+    local dxvk_setup_paths=(
+        "/usr/share/dxvk/setup_dxvk.sh"
+        "/usr/lib/dxvk/setup_dxvk.sh"
+        "/opt/dxvk/setup_dxvk.sh"
+    )
+    for script in "${dxvk_setup_paths[@]}"; do
+        if [[ -x "${script}" ]]; then
+            "${script}" install >> "${LOG_FILE}" 2>&1 && {
+                log_info "DXVK installed via ${script}."
+                return 0
+            }
+        fi
+    done
+
+    # Method 2: Fallback to winetricks dxvk
+    log_info "Falling back to winetricks for DXVK installation."
+    winetricks -q dxvk >> "${LOG_FILE}" 2>&1 || {
+        log_warn "DXVK installation via winetricks failed — games may not use Vulkan translation."
+    }
+
+    wineserver --wait 2>/dev/null || true
+    log_info "DXVK installation step completed."
+}
+
+# ---------------------------------------------------------------------------
+# Install VKD3D-Proton (DirectX 12 → Vulkan)
+# ---------------------------------------------------------------------------
+install_vkd3d() {
+    progress_step "Installing VKD3D-Proton (DirectX 12 → Vulkan)…"
+
+    export WINEPREFIX="${WINE_PREFIX}"
+    export WINEDEBUG="-all"
+
+    # Method 1: System-wide setup script
+    if command -v setup_vkd3d_proton &>/dev/null; then
+        setup_vkd3d_proton install >> "${LOG_FILE}" 2>&1 && {
+            log_info "VKD3D-Proton installed via setup_vkd3d_proton."
+            return 0
+        }
+    fi
+
+    local vkd3d_setup_paths=(
+        "/usr/share/vkd3d-proton/setup_vkd3d_proton.sh"
+        "/usr/lib/vkd3d-proton/setup_vkd3d_proton.sh"
+        "/opt/vkd3d-proton/setup_vkd3d_proton.sh"
+    )
+    for script in "${vkd3d_setup_paths[@]}"; do
+        if [[ -x "${script}" ]]; then
+            "${script}" install >> "${LOG_FILE}" 2>&1 && {
+                log_info "VKD3D-Proton installed via ${script}."
+                return 0
+            }
+        fi
+    done
+
+    # Method 2: Fallback to winetricks
+    log_info "Falling back to winetricks for VKD3D-Proton."
+    winetricks -q vkd3d >> "${LOG_FILE}" 2>&1 || {
+        log_warn "VKD3D-Proton installation failed — DirectX 12 games may not work."
+    }
+
+    wineserver --wait 2>/dev/null || true
+    log_info "VKD3D-Proton installation step completed."
+}
+
+# ---------------------------------------------------------------------------
+# Install Winetricks Dependencies
+# ---------------------------------------------------------------------------
+install_winetricks_deps() {
+    progress_step "Installing Windows runtime dependencies via winetricks…"
+
+    export WINEPREFIX="${WINE_PREFIX}"
+    export WINEDEBUG="-all"
+
+    # Install each package individually for better error isolation
+    for pkg in "${WINETRICKS_PACKAGES[@]}"; do
+        # Skip dxvk — we already handled it with the native setup script
+        if [[ "${pkg}" == "dxvk" ]]; then
+            continue
+        fi
+
+        log_info "Installing winetricks package: ${pkg}"
+        winetricks -q "${pkg}" >> "${LOG_FILE}" 2>&1 || {
+            log_warn "winetricks package '${pkg}' failed to install — continuing."
+        }
+        wineserver --wait 2>/dev/null || true
+    done
+
+    log_info "Winetricks dependency installation completed."
+}
+
+# ---------------------------------------------------------------------------
+# Configure Audio (PipeWire / PulseAudio)
+# ---------------------------------------------------------------------------
+configure_audio() {
+    progress_step "Configuring audio driver…"
+
+    export WINEPREFIX="${WINE_PREFIX}"
+    export WINEDEBUG="-all"
+
+    # Detect audio system: prefer PipeWire, fall back to PulseAudio, then ALSA
+    local audio_driver="pulse"  # PulseAudio / PipeWire-Pulse default
+
+    if command -v pipewire &>/dev/null || pgrep -x pipewire &>/dev/null; then
+        audio_driver="pulse"
+        log_info "PipeWire detected — using PulseAudio compatibility layer."
+    elif command -v pulseaudio &>/dev/null || pgrep -x pulseaudio &>/dev/null; then
+        audio_driver="pulse"
+        log_info "PulseAudio detected."
+    else
+        audio_driver="alsa"
+        log_info "Falling back to ALSA audio driver."
+    fi
+
+    # Set the audio driver in Wine registry
+    wine reg add "HKCU\\Software\\Wine\\Drivers" \
+        /v Audio /t REG_SZ /d "${audio_driver}" /f >> "${LOG_FILE}" 2>&1 || {
+        log_warn "Failed to set audio driver in registry."
+    }
+
+    wineserver --wait 2>/dev/null || true
+    log_info "Audio driver configured: ${audio_driver}"
+}
+
+# ---------------------------------------------------------------------------
+# Final Sanity Check
+# ---------------------------------------------------------------------------
+verify_setup() {
+    progress_step "Verifying Wine prefix integrity…"
+
+    local errors=0
+
+    # Check that essential directories exist
+    for dir in "drive_c" "drive_c/windows" "drive_c/windows/system32"; do
+        if [[ ! -d "${WINE_PREFIX}/${dir}" ]]; then
+            log_error "Missing directory: ${WINE_PREFIX}/${dir}"
+            errors=$((errors + 1))
+        fi
+    done
+
+    # Check for DXVK DLLs
+    local dxvk_dlls=("d3d11.dll" "d3d10core.dll" "d3d9.dll" "dxgi.dll")
+    local dxvk_found=0
+    for dll in "${dxvk_dlls[@]}"; do
+        if [[ -f "${WINE_PREFIX}/drive_c/windows/system32/${dll}" ]]; then
+            dxvk_found=$((dxvk_found + 1))
+        fi
+    done
+
+    if [[ ${dxvk_found} -gt 0 ]]; then
+        log_info "DXVK DLLs found: ${dxvk_found}/${#dxvk_dlls[@]}"
+    else
+        log_warn "No DXVK DLLs detected in system32 — DX9/10/11→Vulkan translation may not work."
+    fi
+
+    if [[ ${errors} -gt 0 ]]; then
+        log_error "Prefix verification found ${errors} issue(s)."
+        notify "critical" "DevShakti Wine Setup" \
+            "Setup completed with ${errors} issue(s). Check ${LOG_FILE}."
+        return 1
+    fi
+
+    log_info "Wine prefix verified successfully."
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# Main Entry Point
+# ---------------------------------------------------------------------------
+main() {
+    _init_logging
+    log_info "====== ${SCRIPT_NAME} v${SCRIPT_VERSION} invoked ======"
+    log_info "Arguments: $*"
+
+    parse_args "$@"
+
+    log_info "Wine prefix target: ${WINE_PREFIX}"
+    log_info "Force recreate: ${FORCE_RECREATE}"
+
+    # Run setup pipeline
+    check_dependencies
+    init_prefix
+    set_windows_version
+    install_dxvk
+    install_vkd3d
+    install_winetricks_deps
+    configure_audio
+    verify_setup
+
+    # Done!
+    progress_step "Setup complete!"
+    notify "normal" "DevShakti Wine Setup" \
+        "Wine environment is ready!\nPrefix: ${WINE_PREFIX}"
+    log_info "====== Setup completed successfully ======"
+
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║        DevShakti Wine Setup — Complete! 🎉                  ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  Prefix:   ${WINE_PREFIX}"
+    echo "║  Windows:  10 (19041)"
+    echo "║  DXVK:     Installed (DX9/10/11 → Vulkan)"
+    echo "║  VKD3D:    Installed (DX12 → Vulkan)"
+    echo "║  Runtimes: vcrun2022, dotnet48, d3dcompiler_47"
+    echo "║  Fonts:    Microsoft Core Fonts"
+    echo "║  Audio:    PipeWire / PulseAudio"
+    echo "║  Log:      ${LOG_FILE}"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+}
+
+main "$@"

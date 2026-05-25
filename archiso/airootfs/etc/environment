@@ -1,0 +1,47 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                    DevShakti OS — Global Environment Variables              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+#
+# System-wide environment variables sourced by PAM via pam_env(8).
+# These apply to ALL users and ALL sessions (login shells, display managers,
+# systemd user services, etc.).
+#
+# Syntax: VARIABLE=value   (no export keyword, no quotes around values)
+#
+# ⚠  Changes here require a fresh login to take effect.
+#
+# Reference: pam_env(8), environment(5)
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ── Vulkan ICD Loader ────────────────────────────────────────────────────────
+# Register both AMD Radeon 760M (iGPU) and NVIDIA RTX 4050 (dGPU) Vulkan
+# drivers so the Vulkan loader can enumerate all available GPUs.
+# Games and applications can then select the appropriate device at runtime.
+# Colon-separated list — loader processes all entries.
+VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/radeon_icd.x86_64.json:/usr/share/vulkan/icd.d/nvidia_icd.json
+
+# ── Qt Theming ───────────────────────────────────────────────────────────────
+# Use qt5ct as the platform theme engine so Qt5/Qt6 applications respect the
+# DevShakti system theme (colors, fonts, icon theme) outside of KDE/GNOME.
+QT_QPA_PLATFORMTHEME=qt5ct
+
+# ── Wayland Integration ─────────────────────────────────────────────────────
+# Force Mozilla Firefox (and Thunderbird) to use the native Wayland backend
+# instead of XWayland, enabling smooth scrolling, fractional scaling, and
+# proper touch/stylus support.
+MOZ_ENABLE_WAYLAND=1
+
+# Force SDL2 applications to use the Wayland video driver natively.
+# Improves latency and removes the XWayland compositing overhead for games.
+SDL_VIDEODRIVER=wayland
+
+# ── Default Editor ───────────────────────────────────────────────────────────
+# Set nano as the system-wide default text editor for visudo, git commit
+# messages, crontab -e, and other programs that respect $EDITOR.
+EDITOR=nano
+
+# ── Java / AWT on Wayland ───────────────────────────────────────────────────
+# Prevent Java AWT/Swing windows from going blank or misplacing under tiling
+# and stacking Wayland compositors. Required for IntelliJ IDEA, Android Studio,
+# and other JetBrains IDEs running on Wayland.
+_JAVA_AWT_WM_NONREPARENTING=1
