@@ -18,6 +18,7 @@ iso_version="$(date +%Y.%m.%d)"
 install_dir="arch"
 buildmodes=('iso')
 arch="x86_64"
+pacman_conf="pacman.conf"
 
 # --- Root Filesystem Image ---------------------------------------------------
 # Use squashfs with zstd compression for optimal size/speed balance.
