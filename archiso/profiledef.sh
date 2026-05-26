@@ -29,14 +29,10 @@ airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '15' '-b' '1M'
 
 # --- Boot Modes --------------------------------------------------------------
 # Support both legacy BIOS (via syslinux) and UEFI (via GRUB) boot.
-# This ensures maximum hardware compatibility across all systems.
+# Uses archiso v88+ boot mode names.
 bootmodes=(
-    'bios.syslinux.mbr'          # BIOS boot from MBR-partitioned media
-    'bios.syslinux.eltorito'     # BIOS boot from optical disc (El Torito)
-    'uefi-ia32.grub.esp'         # 32-bit UEFI boot from ESP
-    'uefi-x64.grub.esp'          # 64-bit UEFI boot from ESP
-    'uefi-ia32.grub.eltorito'    # 32-bit UEFI boot from optical disc
-    'uefi-x64.grub.eltorito'     # 64-bit UEFI boot from optical disc
+    'bios.syslinux'              # BIOS boot (MBR + El Torito)
+    'uefi.grub'                  # UEFI boot (x64 ESP + El Torito)
 )
 
 # --- File Permissions ---------------------------------------------------------
@@ -51,7 +47,6 @@ file_permissions=(
     ["/etc/gshadow"]="0:0:0400"
 
     # Root home directory
-    ["/root"]="0:0:0750"
     ["/root"]="0:0:0750"
 
     # DevShakti custom scripts in /usr/local/bin

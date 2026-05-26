@@ -62,7 +62,7 @@ jobs:
               # ── Update system and install archiso ──
               echo ">>> Installing archiso and dependencies..."
               pacman -Syu --noconfirm
-              pacman -S --noconfirm archiso git base-devel
+              pacman -S --noconfirm archiso git base-devel grub syslinux mkinitcpio edk2-shell
 
               # ── Copy project files ──
               echo ">>> Setting up build workspace..."
