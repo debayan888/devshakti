@@ -77,6 +77,9 @@ jobs:
                 cp -r /build/archiso/airootfs/* /tmp/devshakti-build/airootfs/ 2>/dev/null || true
               fi
 
+              # Ensure /root exists for file_permissions
+              mkdir -p /tmp/devshakti-build/airootfs/root
+
               # ── Set up systemd service symlinks ──
               echo ">>> Creating systemd service symlinks..."
               mkdir -p /tmp/devshakti-build/airootfs/etc/systemd/system/multi-user.target.wants
