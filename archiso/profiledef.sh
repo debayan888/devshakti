@@ -51,11 +51,13 @@ file_permissions=(
 
     # Root home directory
     ["/root"]="0:0:0750"
-    ["/root/.automated_script.sh"]="0:0:0755"
+    ["/root"]="0:0:0750"
 
     # DevShakti custom scripts in /usr/local/bin
-    ["/usr/local/bin/devshakti-setup"]="0:0:0755"
-    ["/usr/local/bin/devshakti-nvidia-switch"]="0:0:0755"
-    ["/usr/local/bin/devshakti-performance"]="0:0:0755"
-    ["/usr/local/bin/devshakti-welcome"]="0:0:0755"
+    ["/usr/local/bin/devshakti-gpu-select"]="0:0:0755"
+    ["/usr/local/bin/devshakti-power-mode"]="0:0:0755"
+    ["/usr/local/bin/devshakti-run-windows"]="0:0:0755"
+    ["/usr/local/bin/devshakti-wine-setup"]="0:0:0755"
+    ["/usr/local/bin/devshakti-install"]="0:0:0755"
+    ["/usr/local/bin/devshakti-first-boot"]="0:0:0755"
 )
