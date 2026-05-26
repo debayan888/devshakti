@@ -67,7 +67,7 @@ xorg-xrandr
 xorg-xdpyinfo
 wayland
 
-# ─── AMD GPU (Radeon 760M iGPU) ─────────────────────────────────────────────
+# ─── AMD GPU (Radeon 740M iGPU) ─────────────────────────────────────────────
 mesa
 lib32-mesa
 vulkan-radeon

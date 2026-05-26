@@ -33,7 +33,7 @@ DevShakti is a custom Linux distribution specifically optimized for the **HP Vic
 
 ### ⚡ Hardware-Optimized
 - **AMD Ryzen 7 7445HS** — Zen 4 architecture, full performance unlocked
-- **AMD Radeon 760M (iGPU)** — RDNA 3, Mesa/RADV Vulkan driver
+- **AMD Radeon 740M (iGPU)** — RDNA 3, Mesa/RADV Vulkan driver
 - **NVIDIA RTX 4050 (dGPU)** — Proprietary driver with PRIME offloading
 - **Vulkan 1.3 + OpenGL 3.2+** — Full graphics API support
 - **16GB DDR5 RAM** — Optimized memory management
