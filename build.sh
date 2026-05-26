@@ -48,6 +48,7 @@ readonly AUR_PACKAGES=(
     "kwin-effects-forceblur"
     "protonup-qt"
     "heroic-games-launcher-bin"
+    "envycontrol"
 )
 
 # Build user for makepkg (cannot run as root)
