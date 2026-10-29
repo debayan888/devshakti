@@ -1,0 +1,77 @@
+{
+ "recap": {
+  "text": "Last time, a zombie climbed down my rope. So I kicked the window.",
+  "dur": 3.9355,
+  "sr": 24000
+ },
+ "land": {
+  "text": "Floor ten. I'm inside. I'm alive.",
+  "dur": 2.2813333333333334,
+  "sr": 24000
+ },
+ "bad": {
+  "text": "Bad news. The hallway is packed with zombies.",
+  "dur": 2.8148333333333335,
+  "sr": 24000
+ },
+ "hose": {
+  "text": "But at the end of that hallway... a fire hose. A very long fire hose.",
+  "dur": 4.611125,
+  "sr": 24000
+ },
+ "r1": {
+  "text": "Rule one. Don't make a sound.",
+  "dur": 1.7387916666666667,
+  "sr": 24000
+ },
+ "r2": {
+  "text": "Rule two. Don't step on anything.",
+  "dur": 2.0639583333333333,
+  "sr": 24000
+ },
+ "r3": {
+  "text": "Rule three. Silence your phone.",
+  "dur": 1.9896666666666667,
+  "sr": 24000
+ },
+ "oops": {
+  "text": "Did I silence my phone?",
+  "dur": 1.4919166666666666,
+  "sr": 24000
+ },
+ "fetch": {
+  "text": "Go fetch.",
+  "dur": 0.820375,
+  "sr": 24000
+ },
+ "thx": {
+  "text": "Thanks, mom.",
+  "dur": 0.9202916666666666,
+  "sr": 24000
+ },
+ "stop": {
+  "text": "Why did the phone go quiet?",
+  "dur": 1.5887916666666666,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part three. Follow, and tell my mom I'm fine.",
+  "dur": 2.8558333333333334,
+  "sr": 24000
+ },
+ "momA": {
+  "text": "Honey? It's your mother. Are you eating enough?",
+  "dur": 2.26,
+  "sr": 24000
+ },
+ "momB": {
+  "text": "Honey? Honey, are you there?",
+  "dur": 1.51,
+  "sr": 24000
+ },
+ "notnow": {
+  "text": "Mom?! Not now!",
+  "dur": 1.0191666666666668,
+  "sr": 24000
+ }
+}
