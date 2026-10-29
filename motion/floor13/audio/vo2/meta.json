@@ -1,0 +1,82 @@
+{
+ "hook": {
+  "text": "Zombies took over my building. And I'm stuck on the thirteenth floor.",
+  "dur": 3.725041666666667,
+  "sr": 24000
+ },
+ "opt1": {
+  "text": "Option one. The elevator.",
+  "dur": 1.5839583333333334,
+  "sr": 24000
+ },
+ "no1": {
+  "text": "Yeah... no.",
+  "dur": 0.9098333333333334,
+  "sr": 24000
+ },
+ "opt2": {
+  "text": "Option two. The stairs.",
+  "dur": 1.5087916666666668,
+  "sr": 24000
+ },
+ "no2": {
+  "text": "Hard no.",
+  "dur": 0.7790416666666666,
+  "sr": 24000
+ },
+ "opt3": {
+  "text": "Option three. The window.",
+  "dur": 1.43625,
+  "sr": 24000
+ },
+ "no3": {
+  "text": "Thirteen floors. Straight down. Also no.",
+  "dur": 2.5437083333333335,
+  "sr": 24000
+ },
+ "tie": {
+  "text": "So I tied every bedsheet I own.",
+  "dur": 1.9363333333333332,
+  "sr": 24000
+ },
+ "more": {
+  "text": "Curtains. My hoodie. One very long scarf.",
+  "dur": 2.6602083333333333,
+  "sr": 24000
+ },
+ "math": {
+  "text": "My math says it reaches the tenth floor. That's fine. That's totally fine.",
+  "dur": 4.38675,
+  "sr": 24000
+ },
+ "f12": {
+  "text": "Floor twelve. He's busy. Good.",
+  "dur": 1.865625,
+  "sr": 24000
+ },
+ "f11": {
+  "text": "Floor eleven. Don't. Look. At him.",
+  "dur": 2.173208333333333,
+  "sr": 24000
+ },
+ "f10": {
+  "text": "Floor ten. The rope ends here. Okay. Next problem.",
+  "dur": 3.229125,
+  "sr": 24000
+ },
+ "move": {
+  "text": "Wait. Why is my rope... moving?",
+  "dur": 1.8969583333333333,
+  "sr": 24000
+ },
+ "climb": {
+  "text": "They can climb?!",
+  "dur": 0.91825,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part two. Follow, so I don't die alone.",
+  "dur": 2.236,
+  "sr": 24000
+ }
+}
