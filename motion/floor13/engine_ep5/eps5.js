@@ -66,26 +66,49 @@ SHOT.open = (ctx, lt, lf, len, t, f) => {                                       
   if (ts > .5 && ts < 1.2) tint(ctx, '#FFF4D0', .35 * (1 - (ts - .5) / .7));
   sfxPop(ctx, 'SLAM', W / 2 - 160, 620, f, EVF('shut'), PAL.chalk, 110, 30, -.06);
 };
-function stairWalk(ts, a, b, x0, y0, x1, y1) { const u = clamp((ts - a) / (b - a)); return [lerp(x0, x1, u), lerp(y0, y1, u), u > 0 && u < 1]; }
+// ---- stair surface: every foot stands on the step under it (no floating)
+const DY = 300 / 11;
+function stairSurf(x) { if (x >= 100) return 0; if (x < -340) return 300; return DY * Math.min(10, Math.floor((100 - x) / 40)); }
+function onStairs(pose, x, dir) {                                             // re-seat the feet on the steps; returns the person's ground y
+  const fl = x + pose.feet.L[0] * dir, fr = x + pose.feet.R[0] * dir, sl = stairSurf(fl), sr = stairSurf(fr), base = (sl + sr) / 2;
+  pose.feet = { L: [pose.feet.L[0], pose.feet.L[1] + sl - base], R: [pose.feet.R[0], pose.feet.R[1] + sr - base] }; return base;
+}
+function walkPath(ts, a, b, x0, x1) { const u = clamp((ts - a) / (b - a)); return [lerp(x0, x1, u), u > 0 && u < 1]; }
 SHOT.stairs = (ctx, lt, lf, len, t, f) => {
-  const ts = t / 60, cam = CAMKEYS(ts, [[5, 300, -200, 1.35, E.ioC], [11.8, 260, -200, 1.3, E.ioC], [17.2, -120, 140, 1.15]]);
+  const ts = t / 60, cam = CAMKEYS(ts, [[5, 300, -200, 1.35, E.ioC], [11.8, 260, -200, 1.3, E.ioC], [14.4, -40, 60, 1.15, E.ioC], [17.2, -300, 150, 1.2]]);
   ctx.save(); applyCam(ctx, { ...cam, hand: 1.4 }, t, []);
   serviceStairs(ctx, f, '7'); darkness(ctx, .5);
-  const [rx, ry, rm] = stairWalk(ts, 12.0, 16.8, 380, 0, -280, 286), [dx, dy, dm] = stairWalk(ts, 12.4, 17.2, 480, 0, -150, 250);
-  const rp = rm ? walkPose(rx / 184, { stride: 30, lift: 18, lean: .15, face: rayFace(f), hands: { L: [20, -100], R: [70, -160] } }) : basePose(pf3(f), { lean: .08, face: rayFace(f, { look: [ts < 12 ? .9 : -.9, 0] }), hands: { L: [20, -100], R: [60, -160] } });
-  ray(ctx, rx, ry, f, rp, { dir: rm ? -1 : 1, aim: rm ? .35 : -.1 });
-  const face = devFace(f, { wide: true, eyes: 1.1, brow: ts > 11.4 ? -1 : -.4, look: [-.9, 0], mouth: devTalk(f), sweat: true });
-  person(ctx, DEVH(dx, dy, dm ? walkPose(dx / 184, { stride: 30, lift: 18, face, hands: { L: [20, -100], R: [36, -150] } }) : basePose(pf3(f), { lean: .05, face, hands: { L: [20, -100], R: [36, -150] } }), { dir: -1, hoodie: false }), pf3(f));
+  const [rx, rm] = walkPath(ts, 12.0, 16.8, 330, -470), [dx, dm] = walkPath(ts, 12.4, 17.2, 480, -380);
+  const rp = rm ? walkPose(rx / 120, { stride: 26, lift: 16, bob: 3, lean: .12, face: rayFace(f), hands: { L: [20, -100], R: [70, -160] } }) : basePose(pf3(f), { lean: .08, face: rayFace(f, { look: [ts < 12 ? .9 : -.9, 0] }), hands: { L: [20, -100], R: [60, -160] } });
+  const rdir = ts >= 12.0 ? -1 : 1, ry = onStairs(rp, rx, rdir);
+  ray(ctx, rx, ry, f, rp, { dir: rdir, aim: rm ? .35 : -.1 });
+  const face = devFace(f, { wide: true, eyes: 1.1, brow: ts > 11.4 ? -1 : -.4, look: [-.9, ts > 12.4 ? .4 : 0], mouth: devTalk(f), sweat: true });
+  const dp = dm ? walkPose(dx / 120, { stride: 26, lift: 16, bob: 3, lean: .06, face, hands: { L: [20, -100], R: [36, -150] } }) : basePose(pf3(f), { lean: .05, face, hands: { L: [20, -100], R: [36, -150] } });
+  const dy = onStairs(dp, dx, -1);
+  person(ctx, DEVH(dx, dy, dp, { dir: -1, hoodie: false }), pf3(f));
   ctx.restore(); vig(ctx, .55);
   if (ts > 7.6 && ts < 10.5) { const k = outB((ts - 7.6) / .25, 1.5); ctx.save(); ctx.translate(W / 2, 600); ctx.scale(k, k); marker(ctx, "HE WROTE \"DON'T TRUST THE LOBBY\"", 0, 0, 40, '#FF9A5C', { stroke: 10 }); ctx.restore(); }
 };
+// ---- a flat stair landing (solid floor under everyone) with the next flight going down on the left
+function landingSet(ctx, f, label, o = {}) {
+  const g = ctx.createLinearGradient(0, -560, 0, 300); g.addColorStop(0, '#232836'); g.addColorStop(1, '#10131C'); ctx.fillStyle = g; ctx.fillRect(-RW - 40, -620, 2 * RW + 80, 1100);
+  ctx.fillStyle = 'rgba(255,255,255,.04)'; for (let y = -560; y < 300; y += 90) ctx.fillRect(-RW, y, 2 * RW, 3);
+  ctx.fillStyle = '#E8C547'; ctx.fillRect(-540, -560, 1080, 14);
+  if (o.window) windowBack(ctx, 60, 0, f, { w: 260, h: 260, curtains: false });
+  for (let i = 0; i < 8; i++) { ctx.fillStyle = i % 2 ? '#4A5163' : '#424959'; ctx.fillRect(-300 - 40 * (i + 1), DY * (i + 1) - 6, 42, 16); }       // steps going down, left
+  ctx.fillStyle = '#161A24'; ctx.beginPath(); ctx.moveTo(-300, 10); ctx.lineTo(-620, 10 + DY * 8); ctx.lineTo(-620, 400); ctx.lineTo(-300, 400); ctx.fill();
+  line(ctx, -300, -120, -620, -120 + DY * 8, 8, '#6A7288');
+  ctx.fillStyle = '#4A5163'; ctx.fillRect(-300, 0, 840, 22); ctx.fillStyle = '#2A2F3C'; ctx.fillRect(-300, 22, 840, 300); ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fillRect(-300, 0, 840, 3);
+  line(ctx, -300, -120, -300, 0, 6, '#59627A'); line(ctx, -300, -120, -220, -120, 8, '#6A7288');
+  rr(ctx, 170, -330, 150, 80, 8, '#1C2A1C', 'rgba(255,255,255,.3)', 3); marker(ctx, label, 245, -275, 56, PAL.chalk, { stroke: .01 });
+}
 SHOT.gen = (ctx, lt, lf, len, t, f) => {
-  const ts = t / 60, cam = CAMKEYS(ts, [[17.2, -150, 160, 1.15, E.ioC], [19.6, -250, 120, 1.35, E.ioC], [25.6, -180, 140, 1.25]]);
+  const ts = t / 60, cam = CAMKEYS(ts, [[17.2, 60, -220, 1.15, E.ioC], [19.6, 0, -230, 1.3, E.ioC], [25.6, 40, -230, 1.25]]);
   ctx.save(); applyCam(ctx, { ...cam, hand: 1.4 }, t, []);
-  ctx.translate(0, -300); serviceStairs(ctx, f, '6'); generator(ctx, 120, 300, f);
-  const lightOn = .35 + .05 * Math.sin(f * .3); darkness(ctx, lightOn); ctx.fillStyle = `rgba(255,220,140,${.1 + .03 * Math.sin(f * 1.3)})`; ctx.beginPath(); ctx.arc(-420, -150, 26, 0, TAU); ctx.fill(); glow(ctx, -420, -150, 420, 'rgba(255,220,140,A)', .25);
-  const remember = ts > 20.6; ray(ctx, -260, 300, f, basePose(pf3(f), { lean: remember ? .2 : .08, tilt: remember ? .15 : 0, face: rayFace(f, { look: [remember ? .3 : .9, remember ? .5 : 0], eyes: remember ? .6 : .8 }), hands: { L: [20, -100], R: [60, -160] } }), { dir: 1, aim: .2 });
-  person(ctx, DEVH(-60, 300, basePose(pf3(f), { lean: .05, face: devFace(f, { wide: ts > 22.6, eyes: 1.1, brow: -.6, look: [-.9, 0], mouth: devTalk(f) }), hands: { L: [20, -100], R: [36, -150] } }), { dir: -1, hoodie: false }), pf3(f));
+  landingSet(ctx, f, '6'); generator(ctx, 360, 0, f);
+  const lightOn = .35 + .05 * Math.sin(f * .3); darkness(ctx, lightOn); ctx.fillStyle = `rgba(255,220,140,${.1 + .03 * Math.sin(f * 1.3)})`; ctx.beginPath(); ctx.arc(60, -470, 22, 0, TAU); ctx.fill(); glow(ctx, 60, -470, 420, 'rgba(255,220,140,A)', .25);
+  const remember = ts > 20.6; ray(ctx, -120, 0, f, basePose(pf3(f), { lean: remember ? .2 : .08, tilt: remember ? .15 : 0, face: rayFace(f, { look: [remember ? .3 : .9, remember ? .5 : 0], eyes: remember ? .6 : .8 }), hands: { L: [20, -100], R: [60, -160] } }), { dir: 1, aim: .2 });
+  person(ctx, DEVH(110, 0, basePose(pf3(f), { lean: .05, face: devFace(f, { wide: ts > 22.6, eyes: 1.1, brow: -.6, look: [-.9, 0], mouth: devTalk(f) }), hands: { L: [20, -100], R: [36, -150] } }), { dir: -1, hoodie: false }), pf3(f));
   ctx.restore(); vig(ctx, .5);
   if (ts > 22.4 && ts < 25.4) { ctx.save(); ctx.globalAlpha = sstep(ts, 22.4, 22.8); rr(ctx, 120, 520, 840, 300, 26, 'rgba(8,10,18,.9)', 'rgba(255,255,255,.2)', 3);              // memory card: Patel, still human, locking the gym
     person(ctx, { x: 330, y: 790, s: .9, dir: 1, kind: 'dev', seed: 81, hoodie: false, shirt: '#2E3342', pose: basePose(pf3(f), { lean: .25, hands: { L: [80, -120], R: [86, -140] }, face: { look: [.9, 0], brow: -.8, mouth: .3 } }) }, pf3(f));
@@ -104,16 +127,16 @@ function vanInsert(ctx, f, ts) {                                                
   ctx.restore();
   ctx.strokeStyle = '#0B0E1A'; ctx.lineWidth = 40; ctx.strokeRect(20, 160, W - 40, H - 360); line(ctx, W / 2, 160, W / 2, H - 200, 24, '#0B0E1A');
   for (let i = 0; i < 14; i++) dot(ctx, 140 + hash(i) * 800, 300 + hash(i * 5) * 900, 3, 'rgba(255,255,255,.3)');
-  if (ts > 30.2) { const k = outB((ts - 30.2) / .25, 1.5); ctx.save(); ctx.translate(W / 2, 1460); ctx.scale(k, k); marker(ctx, 'ENGINE RUNNING · NOBODY INSIDE', 0, 0, 44, PAL.red, { stroke: 12 }); ctx.restore(); }
+  if (ts > 30.2) { const k = outB((ts - 30.2) / .25, 1.5); ctx.save(); ctx.translate(W / 2, 1560); ctx.scale(k, k); marker(ctx, 'ENGINE RUNNING · NOBODY INSIDE', 0, 0, 44, PAL.red, { stroke: 12 }); ctx.restore(); }
   vig(ctx, .6);
 }
 SHOT.van = (ctx, lt, lf, len, t, f) => {
   const ts = t / 60; if (ts >= EVS('van_in') && ts < EVS('van_out')) { vanInsert(ctx, f, ts); return; }
   const cam = CAMKEYS(ts, [[25.6, -100, -230, 1.3, E.ioC], [26.4, 0, -280, 1.6, E.ioC], [32.8, -60, -240, 1.4, E.ioC], [33.6, -60, -240, 1.35]]);
   ctx.save(); applyCam(ctx, { ...cam, hand: 1.4 }, t, []);
-  serviceStairs(ctx, f, '5'); windowBack(ctx, 60, 0, f, { w: 260, h: 260, curtains: false }); darkness(ctx, .42);
-  ray(ctx, -120, 0, f, basePose(pf3(f), { lean: .1, face: rayFace(f, { look: [.9, -.2] }), hands: { L: [20, -100], R: [60, -160] } }), { dir: 1, aim: -.4 });
-  person(ctx, DEVH(330, 0, basePose(pf3(f), { lean: .1, face: devFace(f, { wide: true, eyes: 1.1, brow: -.8, look: [-.6, .5], mouth: devTalk(f) }), hands: { L: [20, -100], R: [36, -150] } }), { dir: -1, hoodie: false }), pf3(f));
+  landingSet(ctx, f, '5', { window: true }); darkness(ctx, .42);
+  ray(ctx, -100, 0, f, basePose(pf3(f), { lean: .1, face: rayFace(f, { look: [.9, -.2] }), hands: { L: [20, -100], R: [60, -160] } }), { dir: 1, aim: -.4 });
+  person(ctx, DEVH(220, 0, basePose(pf3(f), { lean: .1, face: devFace(f, { wide: true, eyes: 1.1, brow: -.8, look: [-.6, .5], mouth: devTalk(f) }), hands: { L: [20, -100], R: [36, -150] } }), { dir: -1, hoodie: false }), pf3(f));
   ctx.restore(); vig(ctx, .5);
 };
 function camInsert(ctx, f, ts) {                                                         // the security camera turns to follow them
@@ -134,12 +157,12 @@ SHOT.cam = (ctx, lt, lf, len, t, f) => {
   const yank = ts >= EVS('yank') - .4;
   const cam = CAMKEYS(ts, [[33.6, -60, -240, 1.35, E.ioC], [35.8, 120, -250, 1.7, E.ioC], [36.8, 120, -250, 1.7, E.ioC], [39.0, -20, -300, 1.3, E.ioC], [41.8, 60, -330, 1.5]]);
   ctx.save(); applyCam(ctx, { ...cam, hand: 1.6 }, t, [[EVF('yank'), 30]]);
-  serviceStairs(ctx, f, '5'); windowBack(ctx, 60, 0, f, { w: 260, h: 260, curtains: false });
+  landingSet(ctx, f, '5', { window: true });
   ctx.save(); ctx.translate(380, -470); rr(ctx, -20, 0, 40, 60, 6, '#3A3F4E'); ctx.rotate(.35); rr(ctx, -110, 50, 140, 60, 20, '#E4E4DE', PAL.ink, 4); dot(ctx, 10, 70, 7, (f % 30) < 18 && !yank ? PAL.red : '#500'); ctx.restore();
   line(ctx, 380, -410, yank ? lerp(380, 250, clamp((ts - EVS('yank') + .4) / .4)) : 400, yank ? -250 : -300, 6, '#111');
   darkness(ctx, .42);
-  ray(ctx, -120, 0, f, basePose(pf3(f), { lean: yank ? -.2 : .1, face: rayFace(f, { look: [.9, -.6] }), hands: { L: [20, -100], R: yank ? [80, -280] : (ts > 39.2 ? [90, -230] : [60, -160]) } }), { dir: 1, aim: ts > 39.2 ? -.9 : -.2 });
-  person(ctx, DEVH(260, 0, basePose(pf3(f), { lean: .05, face: devFace(f, { wide: true, eyes: 1.3, brow: -1, look: ts > 39.2 ? [.4, -.9] : [-.9, 0], mouth: devTalk(f), sweat: true }), hands: { L: [20, -100], R: [40, -226] } }), { dir: -1, hoodie: false, holdHand: 1, holdProp: (c, a) => walkie(c, a[0] + 6, a[1] + 10, f, ts < 35.6, -.2) }), pf3(f));
+  ray(ctx, -100, 0, f, basePose(pf3(f), { lean: yank ? -.2 : .1, face: rayFace(f, { look: [.9, -.6] }), hands: { L: [20, -100], R: yank ? [80, -280] : (ts > 39.2 ? [90, -230] : [60, -160]) } }), { dir: 1, aim: ts > 39.2 ? -.9 : -.2 });
+  person(ctx, DEVH(220, 0, basePose(pf3(f), { lean: .05, face: devFace(f, { wide: true, eyes: 1.3, brow: -1, look: ts > 39.2 ? [.4, -.9] : [-.9, 0], mouth: devTalk(f), sweat: true }), hands: { L: [20, -100], R: [40, -226] } }), { dir: -1, hoodie: false, holdHand: 1, holdProp: (c, a) => walkie(c, a[0] + 6, a[1] + 10, f, ts < 35.6, -.2) }), pf3(f));
   ctx.restore(); vig(ctx, .55);
   sfxPop(ctx, 'KSSHH…', W / 2 - 160, 560, f, EVF('crackle'), '#FFD27A', 100, 34, -.06);
   sfxPop(ctx, 'RIP!', W / 2 + 150, 560, f, EVF('yank'), PAL.red, 130, 20, .06);
