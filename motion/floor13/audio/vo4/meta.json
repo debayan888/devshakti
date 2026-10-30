@@ -1,0 +1,77 @@
+{
+ "recap": {
+  "text": "Last time, a zombie climbed down my rope. So I kicked the window.",
+  "dur": 3.9355,
+  "sr": 24000
+ },
+ "notnow": {
+  "text": "Mom?! Not now!",
+  "dur": 1.0191666666666668,
+  "sr": 24000
+ },
+ "momA": {
+  "text": "Honey? It's your mother. Are you eating enough?",
+  "dur": 2.26,
+  "sr": 24000
+ },
+ "fetch": {
+  "text": "Go fetch.",
+  "dur": 0.820375,
+  "sr": 24000
+ },
+ "thx": {
+  "text": "Thanks, mom.",
+  "dur": 0.9202916666666666,
+  "sr": 24000
+ },
+ "land2": {
+  "text": "Floor ten. Still alive.",
+  "dur": 1.628375,
+  "sr": 24000
+ },
+ "tv": {
+  "text": "Emergency broadcast. Rescue vans are waiting at street level. The last pickup is at sunrise.",
+  "dur": 6.20075,
+  "sr": 24000
+ },
+ "goal": {
+  "text": "Sunrise is in forty-eight minutes. And I'm ten floors up.",
+  "dur": 3.6467916666666667,
+  "sr": 24000
+ },
+ "oh": {
+  "text": "Oh no. It's my landlord.",
+  "dur": 1.6153333333333333,
+  "sr": 24000
+ },
+ "rent": {
+  "text": "He's still mad about the rent.",
+  "dur": 1.4847916666666667,
+  "sr": 24000
+ },
+ "hall2": {
+  "text": "The hallway is full of zombies. But at the end... a fire hose. A hundred feet long.",
+  "dur": 5.338541666666667,
+  "sr": 24000
+ },
+ "rule": {
+  "text": "One rule. Don't make a sound.",
+  "dur": 1.7145,
+  "sr": 24000
+ },
+ "only": {
+  "text": "Of course. He doesn't care about phones. Only rent.",
+  "dur": 2.8423333333333334,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part three. Follow, before my landlord catches me.",
+  "dur": 3.1998333333333333,
+  "sr": 24000
+ },
+ "zrent": {
+  "text": "Rrrrent\u2026",
+  "dur": 1.8,
+  "sr": 24000
+ }
+}

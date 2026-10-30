@@ -35,3 +35,14 @@ Remember: you are always one floor higher than safe. Format 1080x1920 @60, 45 s.
 Continuity element: the floor counter (13 → 12 → 11). Series rule: every episode ends on the next floor number as the cliffhanger.
 Sound: code-made (audio/mix.py): heartbeat, door bangs, zombie groans, wind, rope creaks, snap, glass, bass hit. Gate: delivered, awaiting notes.
 Re-render: cd engine && npm i && CHROME_PATH=<chrome> node capture.js --from 0 --to 2699 --sub 2 --out ../render/frames; python3 audio/mix.py (run inside audio/).
+
+## SERIES BIBLE (from Ep 2 redo, 2026-10-30)
+Hook: stuck on floor 13; every episode ends one floor lower. Goal: rescue vans leave street level at SUNRISE (countdown chip on screen, 48:00 at Ep2).
+Villain: THE LANDLORD (tie zombie, var 1, RENT DUE clipboard). Ignores every distraction; only wants Dev (rent). Running gag + threat.
+Ally (from Ep4): Mira, a survivor in the lobby security room, on a walkie-talkie.
+- Ep1 Floor 13: three options (elevator/stairs/window) -> bedsheet rope -> rope ends at 10 -> zombie climbs down -> kick.
+- Ep2 Floor 10 (redo): crash in -> sits on remote, TV: vans leave at sunrise -> landlord climbs in -> hallway, fire hose -> Mom calls, "go fetch" -> landlord ignores phone, grabs hose as Dev dives.
+- Ep3 Floor 9 "The Hose": hose descent with landlord above; someone opens the hydrant valve -> hose bucks like a jet; Dev swings into floor 7, landlord flung away (not gone).
+- Ep4 Floor 7 "The Gym": treadmill zombies, walkie-talkie found: Mira in the lobby, "I can hold the van 5 minutes." 
+- Ep5 Floor 4 "Daycare": silent floor, tiny zombies, music-box gag; landlord returns via laundry chute.
+- Ep6 Lobby "Sunrise": van leaving, final chase; Dev pays the landlord with the rent envelope (distraction), escapes. Last shot: the van driver turns around... red eyes. Season 2.
