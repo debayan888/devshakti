@@ -1,0 +1,57 @@
+{
+ "recap": {
+  "text": "Last time, I jumped out a window with a fire hose. And my landlord grabbed the other end.",
+  "dur": 5.5655,
+  "sr": 24000
+ },
+ "held": {
+  "text": "The hose held. Floor nine.",
+  "dur": 1.6046666666666667,
+  "sr": 24000
+ },
+ "climb": {
+  "text": "Bad news. He's coming down after me.",
+  "dur": 2.2712083333333335,
+  "sr": 24000
+ },
+ "slide": {
+  "text": "I slide. He slides faster. Of course he does.",
+  "dur": 2.884375,
+  "sr": 24000
+ },
+ "valve": {
+  "text": "Then somebody turned on the water.",
+  "dur": 1.8010833333333334,
+  "sr": 24000
+ },
+ "rent": {
+  "text": "Here's your rent!",
+  "dur": 0.9981666666666666,
+  "sr": 24000
+ },
+ "where": {
+  "text": "Okay. Where am I going?",
+  "dur": 1.3655416666666667,
+  "sr": 24000
+ },
+ "seven": {
+  "text": "Floor seven. Not again.",
+  "dur": 1.6352916666666666,
+  "sr": 24000
+ },
+ "gym": {
+  "text": "It's a gym. And they never skip leg day.",
+  "dur": 2.309833333333333,
+  "sr": 24000
+ },
+ "mira": {
+  "text": "Hello? Is anyone up there? This is Mira. I'm in the lobby.",
+  "dur": 3.3335,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part four. Follow, or the treadmill zombies get me.",
+  "dur": 3.2235833333333335,
+  "sr": 24000
+ }
+}
