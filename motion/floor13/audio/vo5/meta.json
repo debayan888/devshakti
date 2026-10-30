@@ -29,19 +29,14 @@
   "dur": 0.9981666666666666,
   "sr": 24000
  },
- "where": {
-  "text": "Okay. Where am I going?",
-  "dur": 1.3655416666666667,
-  "sr": 24000
- },
  "seven": {
   "text": "Floor seven. Not again.",
   "dur": 1.6352916666666666,
   "sr": 24000
  },
  "gym": {
-  "text": "It's a gym. And they never skip leg day.",
-  "dur": 2.309833333333333,
+  "text": "A gym. The power is on... but nobody is here.",
+  "dur": 3.0076666666666667,
   "sr": 24000
  },
  "mira": {
@@ -50,8 +45,18 @@
   "sr": 24000
  },
  "end": {
-  "text": "Part four. Follow, or the treadmill zombies get me.",
-  "dur": 3.2235833333333335,
+  "text": "Part four. Follow, and help me decide who to trust.",
+  "dur": 3.2148333333333334,
+  "sr": 24000
+ },
+ "mirror": {
+  "text": "Don't trust the lobby?",
+  "dur": 1.2430416666666666,
+  "sr": 24000
+ },
+ "fall": {
+  "text": "He's gone. I think.",
+  "dur": 1.2484583333333332,
   "sr": 24000
  }
 }

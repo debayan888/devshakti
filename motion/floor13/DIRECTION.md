@@ -42,7 +42,8 @@ Villain: THE LANDLORD (tie zombie, var 1, RENT DUE clipboard). Ignores every dis
 Ally (from Ep4): Mira, a survivor in the lobby security room, on a walkie-talkie.
 - Ep1 Floor 13: three options (elevator/stairs/window) -> bedsheet rope -> rope ends at 10 -> zombie climbs down -> kick.
 - Ep2 Floor 10 (redo): crash in -> sits on remote, TV: vans leave at sunrise -> landlord climbs in -> hallway, fire hose -> Mom calls, "go fetch" -> landlord ignores phone, grabs hose as Dev dives.
-- Ep3 Floor 9 "The Hose": hose descent with landlord above; someone opens the hydrant valve -> hose bucks like a jet; Dev swings into floor 7, landlord flung away (not gone).
-- Ep4 Floor 7 "The Gym": treadmill zombies, walkie-talkie found: Mira in the lobby, "I can hold the van 5 minutes." 
-- Ep5 Floor 4 "Daycare": silent floor, tiny zombies, music-box gag; landlord returns via laundry chute.
-- Ep6 Lobby "Sunrise": van leaving, final chase; Dev pays the landlord with the rent envelope (distraction), escapes. Last shot: the van driver turns around... red eyes. Season 2.
+RULES (from Ep3 on): grounded logic. Zombies only shamble, grab, bite, follow sound; no skills (no climbing gear, no machines). Every event needs a physical cause the viewer can see. Tone: mysterious.
+- Ep3 Floor 9 "The Hose" (v2): landlord follows down the hose; a stumbling zombie hits the valve -> water -> jet knocks landlord off, he falls into the dark (body never seen). Hose swing -> floor 7 gym: power on, empty treadmill running, zombies chained inside the glass studio, "DON'T TRUST THE LOBBY" on the mirror; Mira radios from the lobby.
+- Ep4 Floor 7 "Who Is Mira": walkie talk; Mira knows Dev's name (how?). Gym bag holds a keycard "B. PATEL - MAINTENANCE" (the landlord's). Studio chain was locked from the outside: someone survives up here.
+- Ep5 Floor 5 "Maintenance": service stairwell via the keycard; generator noise explains the power; a survivor's camp; tapes/notes about the lobby.
+- Ep6 Lobby "Sunrise": the van, Mira's truth, the landlord's fate. Season-2 hook.

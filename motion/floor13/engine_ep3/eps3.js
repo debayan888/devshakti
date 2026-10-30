@@ -31,7 +31,7 @@ function jet(ctx, x0, y0, x1, y1, f) {                                          
 // ----------------------------------------------------------------------------------------------- exterior (shots ext + ext2)
 function extScene3(ctx, t, f) {
   const ts = t / 60, pf = pf3(f), dh = devHip3(ts), dx = devX3(ts), lh = llHip3(ts);
-  const cam = CAMKEYS(ts, [[0, -520, 1500, 1.15, E.ioC], [1.4, -520, 1780, 1.05, E.ioC], [7.6, -520, 1800, 1.05, E.ioC], [8.6, -520, 1650, .82, E.ioC], [11.4, -520, 1720, .82, E.ioC], [17.4, -520, 2460, .95, E.ioC], [19.6, -520, 2480, .95, E.ioC], [21.4, -520, 2470, .9, E.ioC], [22.6, -560, 2400, .75, E.ioC], [23.4, -700, 2250, .62, E.ioC], [24.4, -520, 2700, .95, E.ioC], [26.6, -480, 3050, 1.0]]);
+  const cam = CAMKEYS(ts, [[0, -520, 1500, 1.15, E.ioC], [1.4, -520, 1780, 1.05, E.ioC], [7.6, -520, 1800, 1.05, E.ioC], [8.6, -520, 1650, .82, E.ioC], [11.4, -520, 1720, .82, E.ioC], [17.4, -520, 2460, .95, E.ioC], [19.6, -520, 2480, .95, E.ioC], [21.4, -520, 2470, .9, E.ioC], [22.6, -520, 2560, .8, E.ioC], [23.6, -520, 3300, .62, E.ioC], [24.6, -520, 2720, .95, E.ioC], [26.6, -480, 3050, 1.0]]);
   ctx.save(); applyCam(ctx, { ...cam, hand: 1.8 }, t, [[60 * 1.2, 26], [60 * 22.4, 22], [60 * 26.5, 34]]);
   outside(ctx, f, cam.y); facade(ctx, f, 11, 6, {});
   // the hose: from the floor-10 hallway window down to Dev, then on to the nozzle
@@ -48,8 +48,8 @@ function extScene3(ctx, t, f) {
     if (ts < EVS('ll_out')) { const p = basePose(pf5(f), { lean: .7, tilt: .3, hands: { L: [60, -150], R: [70, -170] }, face: { look: [.8, .6], mouth: .9 } }); ctx.save(); ctx.beginPath(); ctx.rect(-700, FLOORY(10) - 560, 2000, 560); ctx.clip(); landlord(ctx, -500, FLOORY(10), f, p, { dir: -1 }); ctx.restore(); }
     else { const k = clamp((ts - EVS('ll_out')) / .8), lx = lerp(-500, HANGX - 4, k), hp = hangPose(lh, { face: { look: [0, .9], mouth: .9 }, tilt: .3 }); if (ts > 11.4) { const lxr = ROPEX - (HANGX - 4); hp.hands = { L: [lxr - 3, -HIP_H - 175], R: [lxr + 3, -HIP_H - 135] }; } landlord(ctx, lx, lh + HIP_H, f, hp, { noClip: true }); }
   } else {
-    const u = (ts - EVS('blast')), fx = HANGX - u * 760, fy = lh - 900 * Math.sin(clamp(u / 1.6) * Math.PI * .5) + u * u * 120;
-    ctx.save(); ctx.translate(fx, fy); ctx.rotate(-u * 7); landlord(ctx, 0, HIP_H, f, basePose(pf5(f), { lean: .2, hands: { L: [60, -230], R: [-40, -220] }, feet: { L: [-40, -20], R: [40, -30] }, face: { look: [0, 0], mouth: 1, eyes: 1.2 } }), { noClip: true }); ctx.restore();
+    const u = (ts - EVS('blast')), fx = HANGX - 40 - u * 90, fy = lh + 980 * u * u;
+    ctx.save(); ctx.translate(fx, fy); ctx.rotate(-u * 1.6); landlord(ctx, 0, HIP_H, f, basePose(pf5(f), { lean: .2, hands: { L: [60, -230], R: [-40, -220] }, feet: { L: [-40, -20], R: [40, -30] }, face: { look: [0, 0], mouth: 1, eyes: 1.2 } }), { noClip: true }); ctx.restore();
   }
   // Dev
   let face = devFace(f, { wide: true, eyes: 1.2, brow: -1, mouth: devTalk(f), look: [.4, -.6], sweat: true });
@@ -70,8 +70,8 @@ function extScene3(ctx, t, f) {
   if (ts >= 11.6 && ts < 15.5) sfxPop(ctx, 'HOT! HOT!', W / 2 + 140, 700, f, Math.round(60 * 11.6) + Math.floor((f - 696) / 90) * 90, PAL.red, 90, 40, .06);
   sfxPop(ctx, 'FWOOSH!', W / 2 + 120, 640, f, EVF('spray'), '#9FD8FF', 130, 40, .06);
   sfxPop(ctx, 'SPLOOSH!', W / 2 - 60, 520, f, EVF('blast'), '#9FD8FF', 150, 46, -.08);
-  if (ts >= EVS('twinkle') && ts < EVS('twinkle') + .6) { const k = (ts - EVS('twinkle')) / .6, s = Math.sin(k * Math.PI) * 60; ctx.save(); ctx.translate(200, 480); ctx.rotate(k * 2); ctx.fillStyle = '#fff'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const r = i % 2 ? s * .25 : s, a = i / 8 * TAU; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill(); ctx.restore(); marker(ctx, 'DING', 300, 470, 50, PAL.chalk, { a: 1 - k, stroke: 10 }); }
-  if (ts > 21.5 && ts < 23.2) { const k = outB((ts - 21.5) / .2, 1.5); ctx.save(); ctx.translate(W / 2 + 160, 560); ctx.scale(k, k); marker(ctx, 'RENT: PAID', 0, 0, 80, '#9FD8FF', { stroke: 16 }); ctx.restore(); }
+  if (false) { const k = (ts - EVS('twinkle')) / .6, s = Math.sin(k * Math.PI) * 60; ctx.save(); ctx.translate(200, 480); ctx.rotate(k * 2); ctx.fillStyle = '#fff'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const r = i % 2 ? s * .25 : s, a = i / 8 * TAU; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill(); ctx.restore(); marker(ctx, 'DING', 300, 470, 50, PAL.chalk, { a: 1 - k, stroke: 10 }); }
+  
 }
 SHOT.ext = (ctx, lt, lf, len, t, f) => extScene3(ctx, t, f);
 SHOT.ext2 = (ctx, lt, lf, len, t, f) => extScene3(ctx, t, f);
@@ -91,49 +91,66 @@ SHOT.valve = (ctx, lt, lf, len, t, f) => {
   sfxPop(ctx, 'SQUEAK!', W / 2 - 220, 380, f, EVF('valve_spin'), PAL.chalk, 110, 40, -.08);
   sfxPop(ctx, 'GLUG GLUG', W / 2 + 180, 470, f, EVF('valve_spin') + 40, '#9FD8FF', 90, 40, .08);
 };
-// ----------------------------------------------------------------------------------------------- gym on floor 7
+// ----------------------------------------------------------------------------------------------- gym on floor 7: power on, nobody here, a message on the mirror
 function treadmill(ctx, x, f, speed = 1) {
   rr(ctx, x - 120, -46, 240, 46, 10, '#1C1F28', PAL.ink, 4); ctx.fillStyle = '#2E323E'; ctx.fillRect(x - 112, -50, 224, 8);
   ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 4; const off = (f * 9 * speed) % 40; for (let i = -6; i < 7; i++) { const lx = x + i * 40 - off; if (lx > x - 110 && lx < x + 110) { ctx.beginPath(); ctx.moveTo(lx, -48); ctx.lineTo(lx + 16, -48); ctx.stroke(); } }
-  line(ctx, x + 108, -46, x + 128, -200, 12, '#3A3F4E'); rr(ctx, x + 96, -232, 70, 40, 8, '#14161D', '#5A5F70', 3); ctx.fillStyle = speed > .1 ? '#6CFF9A' : '#333'; ctx.font = `800 16px ${FONTS.sansX}`; ctx.textAlign = 'center'; ctx.fillText(speed > .1 ? '12.0' : '0.0', x + 131, -206);
+  line(ctx, x + 108, -46, x + 128, -200, 12, '#3A3F4E'); rr(ctx, x + 96, -232, 70, 40, 8, '#14161D', '#5A5F70', 3); ctx.fillStyle = speed > .1 ? '#6CFF9A' : '#333'; ctx.font = `800 16px ${FONTS.sansX}`; ctx.textAlign = 'center'; ctx.fillText(speed > .1 ? '6.0' : '0.0', x + 131, -206);
+  if (speed > .1) glow(ctx, x + 131, -212, 90, 'rgba(108,255,154,A)', .25);
 }
 function walkie(ctx, x, y, f, on, rot = 0) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); rr(ctx, -16, -40, 32, 60, 6, '#1E2A1E', '#5A6A5A', 3); line(ctx, 8, -40, 8, -78, 5, '#333'); dot(ctx, -6, -30, 4, on && (f % 20) < 10 ? PAL.red : '#400'); for (let i = 0; i < 3; i++) line(ctx, -9, -14 + i * 9, 9, -14 + i * 9, 2, '#556'); ctx.restore(); }
+function mirrorMsg(ctx, f, a) {                                                      // scrawled warning on the gym mirror
+  rr(ctx, -30, -470, 250, 210, 6, 'rgba(170,200,230,.10)', 'rgba(255,255,255,.3)', 4); ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.beginPath(); ctx.moveTo(0, -470); ctx.lineTo(60, -470); ctx.lineTo(-20, -260); ctx.lineTo(-30, -260); ctx.fill();
+  if (a <= 0) return; const b = Math.floor(f / 5); ctx.save(); ctx.globalAlpha = a; ctx.font = `800 40px ${FONTS.sansX}`; ctx.textAlign = 'center'; ctx.fillStyle = '#C8231C';
+  [["DON'T", -410], ['TRUST THE', -360], ['LOBBY', -305]].forEach(([w, y], i) => { ctx.save(); ctx.translate(95 + jit(i, b, 1.2), y); ctx.rotate(-.06 + i * .03); ctx.fillText(w, 0, 0); ctx.restore(); });
+  ctx.fillRect(60, -298, 4, 26); ctx.fillRect(120, -298, 4, 18); ctx.restore();
+}
 SHOT.gym = (ctx, lt, lf, len, t, f) => {
-  const ts = t / 60, pf = pf3(f), E_ = EVS, lightsOn = ts >= E_('lights') ? (ts < E_('lights') + .4 ? (hash(Math.floor(f / 3)) > .5 ? 1 : 0) : 1) : 0;
-  const cam = CAMKEYS(ts, [[26.6, -260, -230, 1.35, E.ioC], [29.4, -260, -230, 1.35, E.ioC], [30.2, 0, -240, 1.0, E.ioC], [32.4, 40, -240, 1.0, E.ioC], [33.4, -300, -230, 1.45, E.ioC], [37.4, -380, -240, 1.7, E.ioC], [39.2, -400, -240, 1.9]]);
-  ctx.save(); applyCam(ctx, { ...cam, hand: 1.6 }, t, [[EVF('slam7'), 30], [EVF('thrown'), 16]]);
+  const ts = t / 60, pf = pf3(f), E_ = EVS, lightsOn = ts >= E_('lights') ? (ts < E_('lights') + .5 ? (hash(Math.floor(f / 3)) > .45 ? 1 : 0) : 1) : 0;
+  const cam = CAMKEYS(ts, [[26.6, -250, -230, 1.3, E.ioC], [29.4, -250, -230, 1.3, E.ioC], [30.4, 20, -240, .98, E.ioC], [32.6, 20, -240, .98, E.ioC], [33.3, 90, -340, 1.7, E.ioC], [34.9, 90, -340, 1.75, E.ioC], [35.6, -320, -230, 1.45, E.ioC], [38.6, -380, -240, 1.7, E.ioC], [39.9, -400, -240, 1.9]]);
+  ctx.save(); applyCam(ctx, { ...cam, hand: 1.6 }, t, [[EVF('slam7'), 30], [EVF('land7'), 16], [EVF('bang'), 18]]);
   adjacentFloors(ctx, f, 13, .55); roomShell(ctx, 13, f, { wall: '#26262E', la: lightsOn ? .14 : 0 }); brokenWindow(ctx, -420, 0, f);
-  ctx.fillStyle = 'rgba(255,255,255,.06)'; rr(ctx, -40, -420, 520, 200, 6, 'rgba(160,200,255,.08)', 'rgba(255,255,255,.2)', 3); marker(ctx, 'NO PAIN NO GAIN', 220, -300, 40, 'rgba(255,255,255,.4)', { stroke: .01 });
-  const TM = [-300, -20, 230, 470];
-  TM.forEach((x, i) => treadmill(ctx, x, f, i === 0 ? (ts < 27.6 ? 1.6 : 0) : 1));
-  if (!lightsOn) { ctx.fillStyle = 'rgba(4,6,12,.55)'; ctx.fillRect(-RW, -FH, 2 * RW, FH + SLAB); }
-  const heads = ts >= E_('heads');
-  for (let i = 1; i < 4; i++) { const x = TM[i] - 10, ph = f * .055 + i * .37; person(ctx, { x, y: -48, s: .95, dir: 1, kind: 'z', seed: 40 + i, var: (i * 2) % 5, pose: walkPose(ph, { stride: 46, lift: 30, bob: 6, lean: .32, arms: 1.3, tilt: heads ? -.1 : .3, face: { look: heads ? [-1, 0] : [.8, 0], mouth: heads ? 1 : .6, eyes: heads ? 1.3 : 1 } }) }, pf5(f)); }
-  // Dev: through the window, onto the moving belt, thrown off, gets up, finds the walkie
-  let x, y = 0, pose, dir = 1, rot = 0; const face = devFace(f, { wide: true, eyes: 1.15, brow: -.8, mouth: devTalk(f), look: [.9, 0], sweat: true });
-  if (ts < E_('tread')) { const u = clamp((ts - 26.6) / .4); x = lerp(-270, -300, u); y = lerp(-320, -48, u) - Math.sin(u * Math.PI) * 60; rot = lerp(-1, 0, u); pose = basePose(pf, { lean: .3, hands: { L: [60, -170], R: [50, -200] }, feet: { L: [20, -20], R: [50, -40] }, face }); }
-  else if (ts < E_('thrown')) { const u = (ts - E_('tread')) / (E_('thrown') - E_('tread')); x = lerp(-300, -420, u); y = -48; pose = basePose(pf, { lean: -.5 * u, hands: { L: [-60, -150], R: [80, -190] }, face }); }
-  else if (ts < 28.0) { const u = clamp((ts - E_('thrown')) / .3); x = lerp(-420, -500, u); y = 0; rot = -1.4 * E.outQ(u); pose = basePose(pf, { lean: 0, hands: { L: [-50, -170], R: [60, -180] }, face }); }
-  else { x = -500; y = 0; const up = sstep(ts, 28.0, 28.8); rot = lerp(-1.4, 0, up);
-    const pick = sstep(ts, E_('pickup'), E_('pickup') + .4), ear = sstep(ts, E_('pickup') + .4, E_('pickup') + .8);
-    pose = basePose(pf, { lean: .5 * pick * (1 - ear), hands: { L: [20, -100], R: [lerp(30, 80, pick) - ear * 40, lerp(-100, -20, pick * (1 - ear)) - ear * 160] }, face: { ...face, look: ts > E_('look') ? [0, 0] : (heads ? [.9, 0] : [.9, .1]), brow: ts > E_('look') ? .5 : -.8, wide: ts <= E_('look') } }); }
+  mirrorMsg(ctx, f, lightsOn ? 1 : 0);
+  treadmill(ctx, -40, f, 1);                                                                     // running by itself: nobody on it
+  // glass studio on the right: the zombies are locked inside
+  const bang = ts >= E_('bang'), hit = bang ? Math.exp(-((f - EVF('bang')) % 34) / 6) : 0;
+  ctx.fillStyle = 'rgba(10,14,20,.75)'; ctx.fillRect(250, -520, 290, 520);
+  for (let i = 0; i < 3; i++) { const zx = 300 + i * 85, press = bang ? .5 : 0; person(ctx, { x: zx + (bang ? -8 * hit : Math.sin(f * .02 + i) * 14), y: 0, s: .9, dir: -1, kind: 'z', seed: 50 + i, var: (i * 2 + 1) % 5,
+      pose: basePose(pf5(f + i * 7), { lean: .15 + press * .3, tilt: .3 + Math.sin(f * .05 + i) * .1, hands: bang ? { L: [90 + hit * 6, -200 - i * 6], R: [84 + hit * 6, -150] } : { L: [30, -100], R: [24, -96] }, face: { look: [.9, 0], mouth: bang ? 1 : null } }) }, pf5(f + i * 7)); }
+  ctx.fillStyle = 'rgba(150,200,240,.16)'; ctx.fillRect(246, -520, 294, 520); ctx.strokeStyle = 'rgba(220,240,255,.5)'; ctx.lineWidth = 6; ctx.strokeRect(246, -520, 294, 520); line(ctx, 393, -520, 393, 0, 6, 'rgba(220,240,255,.4)');
+  ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.moveTo(270, -520); ctx.lineTo(320, -520); ctx.lineTo(260, -300); ctx.lineTo(250, -300); ctx.fill();
+  rr(ctx, 355, -90, 76, 70, 6, '#6A6F80', PAL.ink, 3); line(ctx, 355, -55, 431, -55, 8, '#9AA0B0');                               // chain + padlock on the glass door
+  ctx.strokeStyle = '#9AA0B0'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(393, -96, 18, Math.PI, TAU); ctx.stroke();
+  // Dev: tumbles in through the window, gets up, checks the empty treadmill, reads the mirror, finds the walkie
+  let x, y = 0, rot = 0, pose; const face = devFace(f, { wide: true, eyes: 1.15, brow: -.8, mouth: devTalk(f), look: [.9, 0], sweat: true });
+  if (ts < E_('land7')) { const u = clamp((ts - 26.6) / .4); x = lerp(-270, -260, u); y = lerp(-320, 0, u) - Math.sin(u * Math.PI) * 60; rot = lerp(-1, -1.4, u); pose = basePose(pf, { lean: .3, hands: { L: [60, -170], R: [50, -200] }, feet: { L: [20, -20], R: [50, -40] }, face }); }
+  else {
+    const up = sstep(ts, 28.2, 29.0), walk = sstep(ts, 30.2, 31.0), back = sstep(ts, E_('bang'), E_('bang') + .3), toW = sstep(ts, 35.6, 36.2);
+    x = lerp(-260, -120, walk) - 60 * back - 200 * toW; rot = lerp(-1.4, 0, up);
+    const pick = sstep(ts, E_('pickup'), E_('pickup') + .4), ear = sstep(ts, E_('pickup') + .4, E_('pickup') + .8), moving = (ts > 30.2 && ts < 31.0) || (ts > 35.6 && ts < 36.2);
+    const lk = ts > E_('look') ? [0, 0] : ts > E_('walkie') ? [-.9, .5] : ts > E_('mirror_t') - .3 ? [.3, -.9] : ts > E_('bang') ? [.9, 0] : [.9, .2];
+    const fc = { ...face, look: lk, brow: ts > E_('look') ? -.3 : -.8, wide: ts <= E_('look') || true };
+    pose = moving ? walkPose(x / 184, { face: fc }) : basePose(pf, { lean: .5 * pick * (1 - ear) - .12 * back, hands: { L: [20, -100], R: [lerp(30, 80, pick) - ear * 40, lerp(-100, -20, pick * (1 - ear)) - ear * 160] }, face: fc });
+  }
+  const dir = ts > 35.5 && ts < 36.3 ? -1 : 1;
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot); const props = ts >= E_('pickup') + .3 ? { holdHand: 1, holdProp: (c, a) => walkie(c, a[0] + 6, a[1] + 10, f, true, -.2) } : {}; person(ctx, { ...DEVH(0, 0, pose, { dir, hoodie: false }), ...props }, pf); ctx.restore();
-  if (ts < E_('pickup') + .3) walkie(ctx, -420, -4, f, ts >= E_('walkie'), 1.2);
-  if (ts >= E_('walkie') && ts < E_('pickup') + .3) ringWaves(ctx, -420, -30, f, EVF('walkie'), '#FFD27A');
-  dust(ctx, -500, -10, f, EVF('thrown') + 10, 6, 1.4);
+  if (ts < E_('pickup') + .3) walkie(ctx, -380, -4, f, ts >= E_('walkie'), 1.2);
+  if (ts >= E_('walkie') && ts < E_('pickup') + .3) ringWaves(ctx, -380, -30, f, EVF('walkie'), '#FFD27A');
+  dust(ctx, -260, -10, f, EVF('land7'), 6, 1.4);
+  if (!lightsOn) { ctx.fillStyle = 'rgba(4,6,12,.55)'; ctx.fillRect(-RW, -FH, 2 * RW, FH + SLAB); }
   ctx.restore(); vig(ctx, .5);
   sfxPop(ctx, 'CRASH!', W / 2 - 20, 560, f, EVF('slam7'), PAL.amber, 150, 36);
-  sfxPop(ctx, 'WHIRRR', W / 2 + 120, 700, f, EVF('tread'), PAL.chalk, 100, 30, .08);
   sfxPop(ctx, 'FLICK', W / 2 + 200, 520, f, EVF('lights'), PAL.chalk, 90, 26, .06);
+  sfxPop(ctx, 'BANG! BANG!', W / 2 + 180, 600, f, EVF('bang'), PAL.red, 110, 50, .06);
   sfxPop(ctx, 'KSSHH…', W / 2 - 180, 640, f, EVF('walkie'), '#FFD27A', 100, 40, -.06);
-  if (ts > 30.3 && ts < 33.4) { const k = outB((ts - 30.3) / .25, 1.5); ctx.save(); ctx.translate(W / 2 + 120, 500); ctx.scale(k, k); marker(ctx, 'FLOOR 7: GYM', 0, 0, 80, PAL.chalk, { stroke: 16 }); ctx.restore(); }
+  if (ts > 31.4 && ts < 32.9) { const k = outB((ts - 31.4) / .25, 1.5); ctx.save(); ctx.translate(W / 2 + 230, 470); ctx.scale(k, k); marker(ctx, 'LOCKED IN', 0, 0, 64, '#B8E986', { stroke: 14 }); ctx.restore(); }
 };
 // ----------------------------------------------------------------------------------------------- end card
 SHOT.end3 = (ctx, lt, lf, len, t, f) => {
   ctx.fillStyle = '#080A12'; ctx.fillRect(0, 0, W, H); const g = ctx.createRadialGradient(W / 2, 760, 50, W / 2, 760, 900); g.addColorStop(0, 'rgba(255,59,48,.28)'); g.addColorStop(1, 'rgba(255,59,48,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   const u = outB(lf / 12, 1.4); ctx.save(); ctx.translate(W / 2, 600); ctx.scale(u, u); marker(ctx, 'PART 4', 0, 0, 190, PAL.chalk, { stroke: 30 }); ctx.restore();
-  const k = lf >= 20 ? outB((lf - 20) / 12, 1.4) : 0; ctx.save(); ctx.translate(W / 2, 840); ctx.scale(k, k); marker(ctx, 'THE GYM', 0, 0, 150, PAL.red, { stroke: 28 }); ctx.restore();
-  const p = clamp((lf - 40) / 10); ctx.save(); ctx.globalAlpha = p; marker(ctx, 'LAST VAN AT SUNRISE  •  46 MIN LEFT', W / 2, 1010, 44, PAL.amber, { stroke: 12 }); marker(ctx, 'FOLLOW, OR THE TREADMILL ZOMBIES GET HIM', W / 2, 1090, 40, '#B8E986', { stroke: 12 }); ctx.restore();
+  const k = lf >= 20 ? outB((lf - 20) / 12, 1.4) : 0; ctx.save(); ctx.translate(W / 2, 840); ctx.scale(k, k); marker(ctx, 'WHO IS MIRA?', 0, 0, 130, PAL.red, { stroke: 26 }); ctx.restore();
+  const p = clamp((lf - 40) / 10); ctx.save(); ctx.globalAlpha = p; marker(ctx, 'LAST VAN AT SUNRISE  •  46 MIN LEFT', W / 2, 1010, 44, PAL.amber, { stroke: 12 }); marker(ctx, 'FOLLOW AND DECIDE WHO TO TRUST', W / 2, 1090, 40, '#B8E986', { stroke: 12 }); ctx.restore();
   for (let i = 0; i < 40; i++) { const x = hash(i * 3.3) * W, y = ((hash(i * 7.1) * H + f * (1 + hash(i) * 2)) % H); dot(ctx, x, y, 2 + hash(i * 2) * 3, 'rgba(255,255,255,.18)'); }
   vig(ctx, .6);
 };

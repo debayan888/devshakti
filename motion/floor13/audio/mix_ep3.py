@@ -2,7 +2,7 @@
 # Run from audio/:  python3 -I mix2.py   -> mix2.wav (then loudness-normalised with ffmpeg in build.sh)
 import json, numpy as np, soundfile as sf
 from scipy import signal
-SR = 48000; FPS = 60; TOT = 44.0; N = int(TOT * SR)
+SR = 48000; FPS = 60; TOT = 45.0; N = int(TOT * SR)
 rng = np.random.default_rng(13)
 TL = json.load(open('../engine_ep3/timeline.json')); SH = TL['shots']; LINES = {l['id']: l for l in TL['lines']}
 T = lambda f: f / FPS
@@ -210,19 +210,23 @@ t = EV['spray']
 while t < 26.6: put('sfx', hp(noise(.5), 700) * np.sin(np.pi * tt(.5) / .5) * .6, t, .45, rng.uniform(-.4, .4)); t += .4
 put('sfx', S(cloth(.3, 1.0), click(.6)), EV['grab_noz'], .6)
 put('sfx', S(impact(1.2, 1.1), hp(noise(1.0), 800) * env_ad(int(1.0 * SR), .002, .3) * 1.2), EV['blast'], 1.0, 0, 'out', .3); put('sfx', zvoice(5, -4, 1.2), EV['blast'] + .05, .75, -.4, 'out', .4)
-put('sfx', whoosh(1.4, 3000, 400, 1.0, False), EV['blast'] + .2, .5, -.6); put('sfx', S(ding(2637, .8, 1.0), ding(3520, .6, .6)), EV['twinkle'], .55, -.6)
-put('sfx', whoosh(2.0, 300, 4000, 1.0), 24.4, .55, .2); put('sfx', riser(2.0, 150, 2500, 1.0), 24.6, .5)
+put('sfx', whoosh(1.6, 2500, 300, 1.0, False), EV['blast'] + .2, .5, -.3); put('sfx', S(thump(.6, 60, 30) * .4), EV['blast'] + 2.6, .25, -.2, 'out', .6)
+put('sfx', whoosh(1.4, 300, 4000, 1.0), 25.4, .55, .2); put('sfx', riser(1.4, 150, 2500, 1.0), 25.2, .5)
 # gym
-put('sfx', S(impact(1.2, 1.1), glass(1.2, 1.0)), EV['slam7'], 1.0, -.2, 'room', .3); put('sfx', S(thump(.4, 80, 40) * 1.2), EV['tread'], .7)
-put('sfx', S(lp(signal.sawtooth(2 * np.pi * 90 * tt(4.0)) * .3, 700) * .6 + bp(noise(4.0), 300, 1500) * .2), 26.7, .45, -.3, 'room', .15)     # treadmill motors
-for i_ in range(3): put('sfx', S(lp(signal.sawtooth(2 * np.pi * (85 + 6 * i_) * tt(12.4)) * .2, 600) * .5), 26.7, .3, .2 + .2 * i_, 'room', .1)
+put('sfx', S(impact(1.2, 1.1), glass(1.2, 1.0)), EV['slam7'], 1.0, -.2, 'room', .3); put('sfx', S(thump(.5, 70, 35) * 1.2, cloth(.4, .8)), EV['land7'], .8, -.3, 'room', .2); put('sfx', oof(1.0), EV['land7'] + .1, .7, -.3)
+put('sfx', S(lp(signal.sawtooth(2 * np.pi * 70 * tt(13.0)) * .25, 500) * .6 + bp(noise(13.0), 300, 1200) * .15), 26.7, .35, -.05, 'room', .15)      # the empty treadmill's motor
 t = 26.8
-while t < 39.2: put('sfx', footstep('wood', 1) * .7, t, .28, rng.uniform(-.1, .7), 'room', .1); t += .15 + rng.uniform(0, .03)       # zombies pounding the belts
-put('sfx', S(whoosh(.4, 600, 3000, .8), thump(.5, 70, 35) * 1.2, cloth(.4, .8)), EV['thrown'], .8, -.4, 'room', .2); put('sfx', oof(1.0), EV['thrown'] + .1, .7, -.4)
-for kk in range(4): put('sfx', S(click(.8), hp(noise(.1), 2000) * env_ad(int(.1 * SR), .001, .03) * .6), EV['lights'] + kk * .1, .5, .1); put('sfx', np.sin(2 * np.pi * 120 * tt(9.6)) * .02, EV['lights'] + .4, .5)
-put('sfx', S(horde(1.4, 3, 1.0, 90), snap_bone(1.0), snap_bone(.8)), EV['heads'], .6, .3, 'room', .3)
+while t < 39.8: put('sfx', S(thump(.08, 300, 200) * .3), t, .12, -.05); t += .32                                                               # belt slats ticking
+for kk in range(4): put('sfx', S(click(.8), hp(noise(.1), 2000) * env_ad(int(.1 * SR), .001, .03) * .6), EV['lights'] + kk * .12, .5, .1)
+put('sfx', np.sin(2 * np.pi * 120 * tt(10.0)) * .02, EV['lights'] + .5, .5)
+steps_between(30.2, 31.0, .3, 'wood', .45, 0, 'room')
+for kk in range(6): put('sfx', S(wood_hit(.6) * .4, glass(.4, .35)), EV['bang'] + kk * .567, .55, .5, 'room', .2)
+put('sfx', S(horde(2.4, 3, 1.0, 88)), EV['bang'] + .1, .55, .5, 'room', .3); put('sfx', inhale(.4, 1.0), EV['bang'] + .05, .5)
+put('sfx', S(riser(.9, 100, 700, .6)), EV['mirror_t'] - .4, .45); put('sfx', S(impact(.9, .8), (np.sin(2 * np.pi * 1975 * tt(1.6)) * np.exp(-tt(1.6) / .5)) * .3), EV['mirror_t'], .55)
+for kk in range(3): put('sfx', heart(1.0), 33.6 + kk * .6, .55)
+steps_between(35.6, 36.2, .28, 'wood', .45, -.2, 'room')
 put('sfx', S(bp(noise(.5), 1500, 5000) * env_ad(int(.5 * SR), .005, .2) * .6, click(.6)), EV['walkie'], .7, -.3)
-put('sfx', S(cloth(.3, .8), click(.5)), EV['pickup'], .5, -.3); put('sfx', S(bp(noise(.3), 1500, 5000) * env_ad(int(.3 * SR), .005, .1) * .5), 36.95, .5, -.2)
+put('sfx', S(cloth(.3, .8), click(.5)), EV['pickup'], .5, -.3); put('sfx', S(bp(noise(.3), 1500, 5000) * env_ad(int(.3 * SR), .005, .1) * .5), 38.95, .5, -.2)
 put('sfx', S(impact(.9, .8), riser(.4, 300, 2000, .5)), EV['look'], .5)
 e3 = ST['end3']; put('sfx', impact(1.4, 1.0), e3 + .05, .7); put('sfx', ding(880, 2.2, .8), e3 + .35, .5, 0, 'room', .3)
 # music
@@ -234,13 +238,12 @@ def madd(x, t, g=1.0):
     if i < N: x = x[:N - i]; mus[i:i + len(x)] += x * g
 A2 = 110.0; tN = np.arange(N) / SR
 drone = (np.sin(2 * np.pi * 55 * tN) * .6 + lp(signal.sawtooth(2 * np.pi * 110 * tN * (1 + .002 * np.sin(tN * .3))) * .3, 500)) * .35
-sect = np.interp(tN, [0, 6, 11.4, 17.4, 17.6, 19.6, 22.4, 24.4, 26.6, 29.6, 33.2, 39.2, 44], [.8, .6, .8, 1, .4, .8, 1, .9, .5, .5, .7, .35, .35]); mus += drone * sect * .6
+sect = np.interp(tN, [0, 6, 11.4, 17.4, 17.6, 19.6, 22.4, 23.2, 24.6, 26.6, 29.6, 33.0, 35.2, 39.9, 45], [.8, .6, .8, 1, .4, .8, 1, .3, .8, .5, .4, .8, .7, .35, .35]); mus += drone * sect * .6
 def pulses(t0, t1, bpm, g, f0=55):
     b = 60 / bpm; k = 0
     while t0 + k * b < t1: madd(thump(.35, f0 * 1.9, f0 * .7, .1) * 1.2, t0 + k * b, g * (1 if k % 4 == 0 else .75)); k += 1
-pulses(0, 6, 100, .5); pulses(11.4, 17.4, 120, .55); pulses(19.6, 22.4, 140, .65); pulses(24.4, 26.6, 160, .75); pulses(29.8, 33.0, 128, .45)
-for tb in np.arange(29.8, 33.0, 60 / 128 / 2): madd(hp(noise(.05), 6500) * env_ad(int(.05 * SR), .0005, .012) * .6, tb, .4)    # gym beat
-for ft, gg in ((EV['jerk'], 1.0), (EV['valve_spin'], .5), (EV['blast'], 1.0), (EV['slam7'], 1.0), (EV['look'], .6)): madd(thump(1.2, 90, 30, .3) * 1.3 + lp(noise(1.2), 600) * env_ad(int(1.2 * SR), .002, .3) * .3, ft, gg * .7)
+pulses(0, 6, 100, .5); pulses(11.4, 17.4, 120, .55); pulses(19.6, 22.4, 140, .65); pulses(24.4, 26.6, 160, .75); pulses(31.2, 33.0, 100, .4)
+for ft, gg in ((EV['jerk'], 1.0), (EV['valve_spin'], .5), (EV['blast'], 1.0), (EV['slam7'], 1.0), (EV['bang'], .6), (EV['mirror_t'], .8), (EV['look'], .6)): madd(thump(1.2, 90, 30, .3) * 1.3 + lp(noise(1.2), 600) * env_ad(int(1.2 * SR), .002, .3) * .3, ft, gg * .7)
 madd(lp(sum(note(f, 4.0, .6, 1.4) for f in (A2, A2 * 1.2599, A2 * 1.4983)), 1500), e3 + .3, .25)
 duck = 1 - .55 * np.clip(lp(VOENV / (np.percentile(VOENV, 98) + 1e-9), 4, 1), 0, 1); mus *= duck; BUS['mus'][0] += mus * .5; BUS['mus'][1] += mus * .5
 GS, GA, GR, GM = .2, .5, .18, .75

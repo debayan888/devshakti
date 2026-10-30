@@ -2,12 +2,12 @@
 import json, re, numpy as np, soundfile as sf
 FPS = 60
 meta = json.load(open('vo5/meta.json'))
-START = {'recap': .20, 'held': 6.20, 'climb': 8.40, 'slide': 11.40, 'valve': 17.80, 'rent': 21.40, 'where': 24.40, 'seven': 27.80, 'gym': 30.00, 'mira': 33.60, 'end': 39.50}
+START = {'recap': .20, 'held': 6.20, 'climb': 8.40, 'slide': 11.40, 'valve': 17.80, 'rent': 21.40, 'fall': 24.20, 'seven': 27.80, 'gym': 29.90, 'mirror': 33.30, 'mira': 35.60, 'end': 40.20}
 SPEAKER = {'mira': 'radio'}
-SHOTS = {'ext': (0, 17.6), 'valve': (17.6, 19.6), 'ext2': (19.6, 26.6), 'gym': (26.6, 39.2), 'end3': (39.2, 44.0)}
-EVENTS = {'dive': .30, 'jerk': 1.20, 'll_out': 8.60, 'slide0': 11.40, 'slide1': 17.40, 'valve_spin': 18.30, 'water_in': 19.60, 'spray': 20.40, 'grab_noz': 21.00, 'blast': 22.40, 'twinkle': 24.00,
-          'slam7': 26.60, 'tread': 27.00, 'thrown': 27.40, 'lights': 29.60, 'heads': 32.60, 'walkie': 33.20, 'pickup': 35.00, 'look': 37.50}
-TOTAL = 44.0
+SHOTS = {'ext': (0, 17.6), 'valve': (17.6, 19.6), 'ext2': (19.6, 26.6), 'gym': (26.6, 39.9), 'end3': (39.9, 45.0)}
+EVENTS = {'dive': .30, 'jerk': 1.20, 'll_out': 8.60, 'slide0': 11.40, 'slide1': 17.40, 'valve_spin': 18.30, 'water_in': 19.60, 'spray': 20.40, 'grab_noz': 21.00, 'blast': 22.40, 'twinkle': 99.0,
+          'slam7': 26.60, 'land7': 27.00, 'lights': 29.50, 'bang': 31.20, 'mirror_t': 33.00, 'walkie': 35.20, 'pickup': 36.40, 'look': 38.90}
+TOTAL = 45.0
 def syl(w):
     w = re.sub(r'[^a-z]', '', w.lower()); n = len(re.findall(r'[aeiouy]+', w))
     if w.endswith('e') and n > 1 and not w.endswith('le'): n -= 1
