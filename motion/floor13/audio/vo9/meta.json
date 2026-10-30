@@ -1,0 +1,77 @@
+{
+ "d1": {
+  "text": "One song. That's all the music gives us.",
+  "dur": 2.517333333333333,
+  "sr": 24000
+ },
+ "q1": {
+  "text": "Look. The prints go back out.",
+  "dur": 2.1546666666666665,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "They lead straight to Mira's booth.",
+  "dur": 1.8773333333333333,
+  "sr": 24000
+ },
+ "q2": {
+  "text": "The awning's torn. Something heavy hit it.",
+  "dur": 2.944,
+  "sr": 24000
+ },
+ "d3": {
+  "text": "Patel. The awning broke his fall.",
+  "dur": 2.2186666666666666,
+  "sr": 24000
+ },
+ "q3": {
+  "text": "The music stopped. Don't run. Walk.",
+  "dur": 2.688,
+  "sr": 24000
+ },
+ "m1": {
+  "text": "In! Close it softly.",
+  "dur": 1.4506666666666668,
+  "sr": 24000
+ },
+ "m2": {
+  "text": "Dev. Thirteen-oh-seven. I know every tenant's face.",
+  "dur": 2.9226666666666667,
+  "sr": 24000
+ },
+ "d4": {
+  "text": "Mira, the wet prints end at your back door.",
+  "dur": 2.7306666666666666,
+  "sr": 24000
+ },
+ "m3": {
+  "text": "Look at the van first. The driver never gets out. Not once.",
+  "dur": 3.648,
+  "sr": 24000
+ },
+ "d5": {
+  "text": "Don't change the subject.",
+  "dur": 1.6,
+  "sr": 24000
+ },
+ "q4": {
+  "text": "Three knocks. That's how Patel collected rent.",
+  "dur": 3.2213333333333334,
+  "sr": 24000
+ },
+ "m4": {
+  "text": "He was still talking when he came in.",
+  "dur": 1.8986666666666667,
+  "sr": 24000
+ },
+ "d6": {
+  "text": "Mira... what did you lock in there?",
+  "dur": 2.1973333333333334,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part eight. Would you open that door?",
+  "dur": 2.176,
+  "sr": 24000
+ }
+}
