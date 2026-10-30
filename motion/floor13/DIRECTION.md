@@ -47,3 +47,4 @@ RULES (from Ep3 on): grounded logic. Zombies only shamble, grab, bite, follow so
 - Ep4 Floor 7 "Who Is Mira": walkie talk; Mira knows Dev's name (how?). Gym bag holds a keycard "B. PATEL - MAINTENANCE" (the landlord's). Studio chain was locked from the outside: someone survives up here.
 - Ep5 Floor 5 "Maintenance": service stairwell via the keycard; generator noise explains the power; a survivor's camp; tapes/notes about the lobby.
 - Ep6 Lobby "Sunrise": the van, Mira's truth, the landlord's fate. Season-2 hook.
+REVEAL MAP (plant -> payoff): Mira knows Dev's name (Ep4) -> she ran the front desk / building intercom (Ep6). Patel's keycard + note (Ep4) -> Patel locked infected tenants away to protect others, then was bitten; "rent" = Dev's unpaid rent envelope held the spare service-stair key (Ep5/6). Mirror "DON'T TRUST THE LOBBY" (Ep3) -> written by the survivor behind the STAFF door (Ep5), who saw the van take people who never came back (Ep6).

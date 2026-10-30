@@ -1,0 +1,62 @@
+{
+ "m1": {
+  "text": "Dev? Is that you?",
+  "dur": 1.26975,
+  "sr": 24000
+ },
+ "d1": {
+  "text": "Wait. I never told her my name.",
+  "dur": 1.811375,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "How do you know my name?",
+  "dur": 1.1445833333333333,
+  "sr": 24000
+ },
+ "m2": {
+  "text": "Everyone here knows you. Apartment thirteen-oh-four. The guy who never pays rent.",
+  "dur": 4.893375,
+  "sr": 24000
+ },
+ "m3": {
+  "text": "The main stairs are blocked. Take the service stairs. You'll need a maintenance keycard.",
+  "dur": 4.4775833333333335,
+  "sr": 24000
+ },
+ "d4": {
+  "text": "B. Patel. Maintenance. That's my landlord's card.",
+  "dur": 3.13375,
+  "sr": 24000
+ },
+ "d5": {
+  "text": "And a note. Don't open. They were my tenants.",
+  "dur": 2.513375,
+  "sr": 24000
+ },
+ "d6": {
+  "text": "He locked them in... before he turned.",
+  "dur": 2.123083333333333,
+  "sr": 24000
+ },
+ "m4": {
+  "text": "Dev. One more thing. Don't trust anyone else up there.",
+  "dur": 3.017875,
+  "sr": 24000
+ },
+ "d7": {
+  "text": "The mirror said the same thing. About her.",
+  "dur": 2.089166666666667,
+  "sr": 24000
+ },
+ "d8": {
+  "text": "Someone else is up here. And they're alive.",
+  "dur": 2.45,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part five. Follow, and find out who's behind that door.",
+  "dur": 3.503791666666667,
+  "sr": 24000
+ }
+}
