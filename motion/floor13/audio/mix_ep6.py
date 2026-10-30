@@ -2,7 +2,7 @@
 # Run from audio/:  python3 -I mix2.py   -> mix2.wav (then loudness-normalised with ffmpeg in build.sh)
 import json, numpy as np, soundfile as sf
 from scipy import signal
-SR = 48000; FPS = 60; TOT = 57.5; N = int(TOT * SR)
+SR = 48000; FPS = 60; TOT = 61.9; N = int(TOT * SR)
 rng = np.random.default_rng(13)
 TL = json.load(open('../engine_ep6/timeline.json')); SH = TL['shots']; LINES = {l['id']: l for l in TL['lines']}
 T = lambda f: f / FPS
@@ -174,6 +174,9 @@ def vo_process(x):
 def phone_process(x): x = bp(x, 380, 3400, 3); x = np.tanh(x * 3.2); x = peak(x, 1500, 1.2, 4); return x / (np.max(np.abs(x)) + 1e-9) * .85
 
 EV = {k: v / FPS for k, v in TL['events'].items()}
+D6 = 4.4
+def sh(t): return t + D6 if t >= 12.6 else t
+TOT = TL['total'] / FPS
 
 
 # ------------------------------------------------------------------ voice
@@ -188,36 +191,38 @@ def steps_between(t0, t1, per, kind, g, pan=0, rev=None, jitter=.01):
     t = t0
     while t < t1: put('sfx', footstep(kind, 1), t, g * rng.uniform(.85, 1.1), pan, rev, .2); t += per + rng.uniform(-jitter, jitter)
 def radio_burst(t, g=.6): put('sfx', S(bp(noise(.35), 1500, 5000) * env_ad(int(.35 * SR), .005, .12) * .6, click(.6)), t, g, .15)
-put('amb', S(lp(noise(57.5), 220) * .06, bp(noise(57.5), 400, 900) * .015), 0, 1)                                   # stairwell hum
+put('amb', S(lp(noise(TOT), 220) * .06, bp(noise(TOT), 400, 900) * .015), 0, 1)                                   # stairwell hum
 put('sfx', S(click(1.0), hp(noise(.2), 2000) * env_ad(int(.2 * SR), .001, .05) * .4), EV['click'], .7, -.1)
-for tz in np.arange(3.0, 46, 4.7): put('sfx', zvoice(int(tz) % 6, -9, .7), tz, .11, rng.uniform(-.8, .8), 'well', .7)
-for a in (3.4, EV['segB'], EV['segC'], 46.0):
-    steps_between(a + .1, a + 2.8, .23, 'wood', .45, -.2, 'well'); steps_between(a + .35, a + 3.0, .23, 'wood', .4, .2, 'well'); put('sfx', whoosh(.3, 400, 2500, .5), a - .05, .35)
-put('sfx', S(creak(.6, 380, .8)), 12.65, .4, .3, 'well', .2)
+for tz in np.arange(3.0, sh(46), 4.7): put('sfx', zvoice(int(tz) % 6, -9, .7), tz, .11, rng.uniform(-.8, .8), 'well', .7)
+for a, b, b2 in ((3.6, 10.0, 10.0), (EV['segB'], EV['segC'], EV['segC']), (EV['segC'], EV['segD'], EV['segD']), (EV['segD'], 15.7, 16.9)):   # concrete stairs, Ray then Dev
+    steps_between(a + .02, b, .2, 'wood', .45, -.2, 'well'); steps_between(a + .12, b2, .2, 'wood', .38, .2, 'well')
+for a in (EV['segB'], EV['segC'], EV['segD']): put('sfx', whoosh(.3, 400, 2500, .5), a - .05, .3)
+steps_between(sh(47.9), sh(48.8), .3, 'wood', .4, .2, 'well')
+put('sfx', S(creak(.6, 380, .8)), 17.05, .4, .3, 'well', .2)
 # lobby inserts: muffled engine, buzzing monitors, Mira typing
-for t0_, d_ in ((13.8, 10.2), (EV['lobby2_in'], 3.2)):
+for t0_, d_ in ((EV['win_in'], 10.2), (EV['lobby2_in'], 3.2)):
     put('amb', S(lp(signal.sawtooth(2 * np.pi * 34 * tt(d_)) * .4, 250) * .55, np.sin(2 * np.pi * 120 * tt(d_)) * .015), t0_, .8, .3)
-for kk in range(20): put('sfx', S(click(.5)), 14.0 + kk * .16 + rng.uniform(0, .05), .12, -.3)
-put('sfx', S(impact(.8, .7), riser(.4, 300, 2000, .5)), 16.8, .5)
-for kk in range(3): put('sfx', zvoice(kk, -9, .8), 17.2 + kk * 1.4, .2, .3, 'out', .5)
-put('sfx', S(impact(.9, .8), (np.sin(2 * np.pi * 1975 * tt(1.6)) * np.exp(-tt(1.6) / .5)) * .3), 21.2, .55)
+for kk in range(20): put('sfx', S(click(.5)), sh(14.0) + kk * .16 + rng.uniform(0, .05), .12, -.3)
+put('sfx', S(impact(.8, .7), riser(.4, 300, 2000, .5)), sh(16.8), .5)
+for kk in range(3): put('sfx', zvoice(kk, -9, .8), sh(17.2) + kk * 1.4, .2, .3, 'out', .5)
+put('sfx', S(impact(.9, .8), (np.sin(2 * np.pi * 1975 * tt(1.6)) * np.exp(-tt(1.6) / .5)) * .3), sh(21.2), .55)
 radio_burst(EV['crackle'], .7)
 for l in TL['lines']:
     if l.get('speaker') == 'radio': radio_burst(l['t0'] / FPS - .12, .5); radio_burst((l['t0'] + l['n']) / FPS + .02, .4)
-put('sfx', S(bp(noise(1.6), 1200, 5000) * .12), 31.4, .4, 0)                                                        # CCTV hiss
-for kk in range(4): put('sfx', heart(1.0), 32.0 + kk * .55, .5)
+put('sfx', S(bp(noise(1.6), 1200, 5000) * .12), sh(31.4), .4, 0)                                                        # CCTV hiss
+for kk in range(4): put('sfx', heart(1.0), sh(32.0) + kk * .55, .5)
 # the garage music: played over the building speakers
 mel = [523, 659, 784, 659, 587, 698, 880, 698]; mt = np.zeros(int(4.2 * SR))
 for i in range(32):
     tb = i * .13; n_ = ding(mel[i % 8], .3, 1.0); a_ = int(tb * SR); mt[a_:a_ + len(n_)] += n_[:len(mt) - a_]
 mt = lp(hp(mt, 600), 3500) + lp(signal.square(2 * np.pi * 65 * tt(4.2)) * .1, 300) * (np.sin(np.pi * 4 * tt(4.2)) > 0)
 put('sfx', mt, EV['music'], .7, .55, 'out', .6)
-for kk in range(5): put('sfx', zvoice(kk, -8, .8), 43.2 + kk * .5, .25, .5, 'out', .4)
-t = 43.0
-while t < 46: put('sfx', S(lp(noise(.3), 700) * env_ad(int(.3 * SR), .02, .1) * .5), t, .3, .5, 'out', .2); t += .25
+for kk in range(5): put('sfx', zvoice(kk, -8, .8), sh(43.2) + kk * .5, .25, .5, 'out', .4)
+t = sh(43.0)
+while t < sh(46): put('sfx', S(lp(noise(.3), 700) * env_ad(int(.3 * SR), .02, .1) * .5), t, .3, .5, 'out', .2); t += .25
 put('sfx', S(impact(1.2, 1.0), riser(.5, 300, 3000, .6)), EV['find'], .8)
-for kk in range(4): put('sfx', heart(1.0), 48.2 + kk * .55, .55 + .05 * kk)
-put('sfx', S(lp(noise(1.2), 500) * np.abs(np.sin(tt(1.2) * 9)) * .2), 47.6, .3, .2)                                  # drip
+for kk in range(4): put('sfx', heart(1.0), sh(48.2) + kk * .55, .55 + .05 * kk)
+put('sfx', S(lp(noise(1.2), 500) * np.abs(np.sin(tt(1.2) * 9)) * .2), sh(47.6), .3, .2)                                  # drip
 e6 = ST['end6']; put('sfx', impact(1.4, 1.0), e6 + .05, .7); put('sfx', ding(880, 2.2, .8), e6 + .35, .5, 0, 'room', .3)
 mus = np.zeros(N)
 def madd(x, t, g=1.0):
@@ -225,10 +230,10 @@ def madd(x, t, g=1.0):
     if i < N: x = x[:N - i]; mus[i:i + len(x)] += x * g
 tN = np.arange(N) / SR
 drone = (np.sin(2 * np.pi * 55 * tN) * .6 + lp(signal.sawtooth(2 * np.pi * 110 * tN * (1 + .002 * np.sin(tN * .3))) * .3, 500)) * .35
-sect = np.interp(tN, [0, 3.4, 12.6, 16.8, 24, 35.4, 42.8, 46, 47.6, 52.5, 57.5], [.8, .5, .7, .9, .7, .6, .2, .6, 1, .3, .3]); mus += drone * sect * .6
+sect = np.interp(tN, [0, 3.4] + [sh(v) for v in (12.6, 16.8, 24, 35.4, 42.8, 46, 47.6, 52.5, 57.5)], [.8, .5, .7, .9, .7, .6, .2, .6, 1, .3, .3]); mus += drone * sect * .6
 box = [880, 1046.5, 1318.5, 1174.7, 987.8, 880, 1318.5, 1046.5]
-for i, tb in enumerate(np.arange(3.6, 42, 1.5)): madd(ding(box[i % 8], 1.2, 1.0), tb, .15)
-for ft, gg in ((16.8, .8), (21.2, .6), (EV['crackle'], .5), (EV['find'], 1.0)): madd(thump(1.2, 90, 30, .3) * 1.3 + lp(noise(1.2), 600) * env_ad(int(1.2 * SR), .002, .3) * .3, ft, gg * .7)
+for i, tb in enumerate(np.arange(3.6, sh(42), 1.5)): madd(ding(box[i % 8], 1.2, 1.0), tb, .15)
+for ft, gg in ((sh(16.8), .8), (sh(21.2), .6), (EV['crackle'], .5), (EV['find'], 1.0)): madd(thump(1.2, 90, 30, .3) * 1.3 + lp(noise(1.2), 600) * env_ad(int(1.2 * SR), .002, .3) * .3, ft, gg * .7)
 def note(f, d, a=.01, r=.2, det=.004):
     t = tt(d); ph = 2 * np.pi * f * t; s_ = (signal.sawtooth(ph) + signal.sawtooth(ph * (1 + det)) + signal.sawtooth(ph * (1 - det))) / 3; return s_ * np.minimum(t / a, 1) * np.minimum((d - t) / r, 1)
 madd(lp(sum(note(f, 4.8, .6, 1.4) for f in (110, 130.8, 164.8)), 1500), e6 + .3, .25)

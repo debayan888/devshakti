@@ -2,12 +2,11 @@
 import json, re, numpy as np, soundfile as sf
 FPS = 60
 meta = json.load(open('vo8/meta.json'))
-START = {'q1': .90, 'd1': 4.60, 'q2': 7.00, 'd2': 14.00, 'd3': 15.80, 'q3': 17.50, 'd4': 21.10, 'm1': 24.30, 'd5': 28.00, 'm2': 31.50, 'q4': 33.10,
-         'q5': 35.50, 'd6': 38.00, 'm3': 41.30, 'd7': 48.00, 'end': 52.80}
+START = {'q1': 0.9, 'd1': 4.6, 'q2': 7.0, 'd2': 18.4, 'd3': 20.2, 'q3': 21.9, 'd4': 25.5, 'm1': 28.7, 'd5': 32.4, 'm2': 35.9, 'q4': 37.5, 'q5': 39.9, 'd6': 42.4, 'm3': 45.7, 'd7': 52.4, 'end': 57.2}
 SPEAKER = {'m1': 'radio', 'm2': 'radio', 'm3': 'radio', 'q1': 'ray', 'q2': 'ray', 'q3': 'ray', 'q4': 'ray', 'q5': 'ray'}
-SHOTS = {'dark': (0, 3.4), 'desc': (3.4, 12.6), 'lobby': (12.6, 24.0), 'radio': (24.0, 35.4), 'plan': (35.4, 46.0), 'cliff': (46.0, 52.5), 'end6': (52.5, 57.5)}
-EVENTS = {'click': .50, 'segB': 6.4, 'segC': 9.4, 'win_in': 13.8, 'booth': 14.0, 'awning': 15.8, 'crackle': 24.0, 'music': 42.8, 'lobby2_in': 42.8, 'lobby2_out': 46.0, 'find': 47.6}
-TOTAL = 57.5
+SHOTS = {'dark': (0, 3.4), 'desc': (3.4, 17.0), 'lobby': (17.0, 28.4), 'radio': (28.4, 39.8), 'plan': (39.8, 50.4), 'cliff': (50.4, 56.9), 'end6': (56.9, 61.9)}
+EVENTS = {'click': 0.5, 'segB': 10.0, 'segC': 12.0, 'segD': 14.0, 'win_in': 18.2, 'booth': 18.4, 'awning': 20.2, 'crackle': 28.4, 'music': 47.2, 'lobby2_in': 47.2, 'lobby2_out': 50.4, 'find': 52.0}
+TOTAL = 61.9
 def syl(w):
     w = re.sub(r'[^a-z]', '', w.lower()); n = len(re.findall(r'[aeiouy]+', w))
     if w.endswith('e') and n > 1 and not w.endswith('le'): n -= 1
