@@ -1,0 +1,72 @@
+{
+ "r1": {
+  "text": "Shh. Inside. Now.",
+  "dur": 1.8572916666666666,
+  "sr": 24000
+ },
+ "d1": {
+  "text": "Who are you?",
+  "dur": 0.8382083333333333,
+  "sr": 24000
+ },
+ "r2": {
+  "text": "Ray. Night maintenance. I wrote that on the mirror.",
+  "dur": 2.7178333333333335,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "Why? Mira's trying to help me.",
+  "dur": 1.7194583333333333,
+  "sr": 24000
+ },
+ "r3": {
+  "text": "Then ask her why nobody she helped ever came back up.",
+  "dur": 3.136833333333333,
+  "sr": 24000
+ },
+ "r4": {
+  "text": "I started the generator. That's why the lights work.",
+  "dur": 2.6675416666666667,
+  "sr": 24000
+ },
+ "r5": {
+  "text": "Patel saved my life. He locked the sick ones in the gym. Then one of them bit him.",
+  "dur": 4.471333333333333,
+  "sr": 24000
+ },
+ "r6": {
+  "text": "At midnight, twelve people got into that van.",
+  "dur": 2.458833333333333,
+  "sr": 24000
+ },
+ "d3": {
+  "text": "And?",
+  "dur": 0.4570416666666667,
+  "sr": 24000
+ },
+ "r7": {
+  "text": "It never left. Engine's still running.",
+  "dur": 2.2642083333333334,
+  "sr": 24000
+ },
+ "m1": {
+  "text": "Dev? Who is that with you?",
+  "dur": 1.580375,
+  "sr": 24000
+ },
+ "d4": {
+  "text": "How does she know?",
+  "dur": 0.951,
+  "sr": 24000
+ },
+ "r8": {
+  "text": "She's watching. She's always been watching.",
+  "dur": 2.3995416666666665,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part six. Follow, and tell me. Ray, or Mira?",
+  "dur": 2.998083333333333,
+  "sr": 24000
+ }
+}
