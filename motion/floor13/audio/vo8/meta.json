@@ -1,0 +1,82 @@
+{
+ "q1": {
+  "text": "Cameras are out. Now she's blind.",
+  "dur": 2.0389166666666667,
+  "sr": 24000
+ },
+ "d1": {
+  "text": "Ray. Why are you helping me?",
+  "dur": 1.56825,
+  "sr": 24000
+ },
+ "q2": {
+  "text": "Because Patel would have.",
+  "dur": 1.5280833333333332,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "That's Mira. She's real.",
+  "dur": 1.4535,
+  "sr": 24000
+ },
+ "d3": {
+  "text": "And look. Under the awning.",
+  "dur": 1.3197083333333333,
+  "sr": 24000
+ },
+ "q3": {
+  "text": "Every time someone runs for the van, they come out of the dark.",
+  "dur": 3.2475833333333335,
+  "sr": 24000
+ },
+ "d4": {
+  "text": "The engine isn't a rescue. It's a dinner bell.",
+  "dur": 2.626708333333333,
+  "sr": 24000
+ },
+ "m1": {
+  "text": "Dev? Your cameras went dark. The van is right there. Just run!",
+  "dur": 3.3762083333333335,
+  "sr": 24000
+ },
+ "d5": {
+  "text": "Mira, check the left side of the doors. Under the awning.",
+  "dur": 3.151291666666667,
+  "sr": 24000
+ },
+ "m2": {
+  "text": "There's nothing on my screen.",
+  "dur": 1.32675,
+  "sr": 24000
+ },
+ "q4": {
+  "text": "Her camera can't see under the awning.",
+  "dur": 2.090125,
+  "sr": 24000
+ },
+ "q5": {
+  "text": "The speakers run on my generator.",
+  "dur": 2.193125,
+  "sr": 24000
+ },
+ "d6": {
+  "text": "Mira. Can you play something loud in the parking garage?",
+  "dur": 3.01775,
+  "sr": 24000
+ },
+ "m3": {
+  "text": "Okay. Playing it now.",
+  "dur": 1.3843333333333334,
+  "sr": 24000
+ },
+ "d7": {
+  "text": "That's his clipboard. He fell eight floors. So who carried it inside?",
+  "dur": 4.003125,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part seven. Follow, and tell me who carried it in.",
+  "dur": 2.7495833333333333,
+  "sr": 24000
+ }
+}
