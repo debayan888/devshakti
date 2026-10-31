@@ -1,0 +1,62 @@
+{
+ "m1": {
+  "text": "He asked me to lock him in. He said, don't let me collect.",
+  "dur": 3.456,
+  "sr": 24000
+ },
+ "q1": {
+  "text": "So he locked himself away. Like he did with the sick tenants.",
+  "dur": 3.904,
+  "sr": 24000
+ },
+ "d1": {
+  "text": "And the prints? He went for the stairs?",
+  "dur": 2.24,
+  "sr": 24000
+ },
+ "m2": {
+  "text": "He wanted to warn the tenants. He only made it to the first step.",
+  "dur": 3.3706666666666667,
+  "sr": 24000
+ },
+ "q2": {
+  "text": "Every knock is a dinner bell. They're coming to the glass.",
+  "dur": 3.498666666666667,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "I dodged his rent for six months. I know that knock.",
+  "dur": 3.498666666666667,
+  "sr": 24000
+ },
+ "d3": {
+  "text": "You knock back... and he waits.",
+  "dur": 2.026666666666667,
+  "sr": 24000
+ },
+ "m3": {
+  "text": "Six months, Dev?",
+  "dur": 1.1733333333333333,
+  "sr": 24000
+ },
+ "d4": {
+  "text": "Not now.",
+  "dur": 1.1093333333333333,
+  "sr": 24000
+ },
+ "q3": {
+  "text": "The engine just stopped.",
+  "dur": 2.1333333333333333,
+  "sr": 24000
+ },
+ "m4": {
+  "text": "The seat's empty. He's out.",
+  "dur": 1.8346666666666667,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part nine. Where did the driver go?",
+  "dur": 2.432,
+  "sr": 24000
+ }
+}
