@@ -1,0 +1,77 @@
+{
+ "d1": {
+  "text": "Show me the arm first.",
+  "dur": 1.6426666666666667,
+  "sr": 24000
+ },
+ "q1": {
+  "text": "That's a straight cut. Teeth don't cut straight.",
+  "dur": 3.029333333333333,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "Mira. Open it.",
+  "dur": 1.344,
+  "sr": 24000
+ },
+ "m1": {
+  "text": "Sit down. Keep pressure on that.",
+  "dur": 1.984,
+  "sr": 24000
+ },
+ "d3": {
+  "text": "Who are you? Why were you playing dead?",
+  "dur": 2.1333333333333333,
+  "sr": 24000
+ },
+ "v1": {
+  "text": "Name's Cole. I drive for Saint Anne's.",
+  "dur": 2.2186666666666666,
+  "sr": 24000
+ },
+ "v2": {
+  "text": "Tonight we moved six patients. Bitten... but not turned.",
+  "dur": 2.88,
+  "sr": 24000
+ },
+ "q2": {
+  "text": "Six? Where are they now?",
+  "dur": 1.9626666666666666,
+  "sr": 24000
+ },
+ "v3": {
+  "text": "The back doors were locked when I froze. They're open now.",
+  "dur": 2.8373333333333335,
+  "sr": 24000
+ },
+ "m2": {
+  "text": "Those straps weren't torn. They were cut.",
+  "dur": 2.176,
+  "sr": 24000
+ },
+ "q3": {
+  "text": "And the rear window's smashed.",
+  "dur": 2.1333333333333333,
+  "sr": 24000
+ },
+ "m3": {
+  "text": "Garage camera. Look.",
+  "dur": 1.6213333333333333,
+  "sr": 24000
+ },
+ "v4": {
+  "text": "Don't let them hear you. They're not like the others.",
+  "dur": 2.474666666666667,
+  "sr": 24000
+ },
+ "d4": {
+  "text": "It's... looking at us.",
+  "dur": 1.5573333333333332,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part eleven. The quiet ones.",
+  "dur": 1.9413333333333334,
+  "sr": 24000
+ }
+}

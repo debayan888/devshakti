@@ -86,7 +86,7 @@ function driverMan(ctx, x, f, ts, o = {}) {
   ctx.fillStyle = '#2B3A55'; ctx.strokeStyle = PAL.ink; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, -4, hr + 3, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill(); ctx.stroke();   // cap
   rr(ctx, hr * .3, -hr * .3, hr * .95, 10, 5, '#22304A', PAL.ink, 3); ctx.restore();
   rr(ctx, hx - 30, hy + 84, 30, 22, 3, '#E8E8E0', PAL.ink, 2);                                                                           // ID badge
-  const [lx, ly] = r.hands[0]; if (!o.hide) { rr(ctx, lx - 6, ly + 4, 34, 16, 5, '#EDEBE3', PAL.ink, 2); dot(ctx, lx + 14, ly + 12, 5, '#9A2A2A'); }   // bandaged forearm
+  const lx = x - r.hands[0][0], ly = r.hands[0][1]; if (!o.hide) { rr(ctx, lx - 6, ly + 4, 34, 16, 5, '#EDEBE3', PAL.ink, 2); dot(ctx, lx + 14, ly + 12, 5, '#9A2A2A'); }   // bandaged forearm
 }
 const DEAD9 = [[930, 51, 33.6], [1020, 52, 34.4], [1110, 53, 35.2]];
 function lobbyBehind(ctx, f, ts, o = {}) {                                           // what's on the other side of the booth glass
