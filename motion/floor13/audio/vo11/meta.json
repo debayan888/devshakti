@@ -1,0 +1,62 @@
+{
+ "q1": {
+  "text": "No engine. Nothing keeps them under the awning now.",
+  "dur": 3.392,
+  "sr": 24000
+ },
+ "m1": {
+  "text": "Then let's see where our driver went.",
+  "dur": 1.7706666666666666,
+  "sr": 24000
+ },
+ "d1": {
+  "text": "Wait. He only moves when they groan.",
+  "dur": 2.2826666666666666,
+  "sr": 24000
+ },
+ "m2": {
+  "text": "He's not one of them. He's been playing dead for an hour.",
+  "dur": 2.7946666666666666,
+  "sr": 24000
+ },
+ "q2": {
+  "text": "That's no rescue van. It's a hospital transfer van.",
+  "dur": 3.968,
+  "sr": 24000
+ },
+ "m3": {
+  "text": "That was two minutes ago.",
+  "dur": 1.3653333333333333,
+  "sr": 24000
+ },
+ "v1": {
+  "text": "Please. Let me in. They're right behind me.",
+  "dur": 2.176,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "Your arm. Is that a bite?",
+  "dur": 1.7493333333333334,
+  "sr": 24000
+ },
+ "v2": {
+  "text": "It's glass. I swear it's glass.",
+  "dur": 1.8986666666666667,
+  "sr": 24000
+ },
+ "q3": {
+  "text": "Don't open it.",
+  "dur": 1.1946666666666668,
+  "sr": 24000
+ },
+ "m4": {
+  "text": "Dev. It's your call.",
+  "dur": 1.4506666666666668,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part ten. Would you let him in?",
+  "dur": 1.8133333333333332,
+  "sr": 24000
+ }
+}
