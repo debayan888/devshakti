@@ -1,0 +1,42 @@
+{
+ "d1": {
+  "text": "Nobody move. Nobody breathe.",
+  "dur": 2.453333333333333,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "I owe him an answer.",
+  "dur": 1.7066666666666668,
+  "sr": 24000
+ },
+ "q1": {
+  "text": "Easy, Mister Patel. Rent's paid.",
+  "dur": 2.8373333333333335,
+  "sr": 24000
+ },
+ "v1": {
+  "text": "I'll hold it. I've got nowhere to be.",
+  "dur": 2.24,
+  "sr": 24000
+ },
+ "v2": {
+  "text": "They're not breaking it. They're just leaning on it. All six.",
+  "dur": 2.986666666666667,
+  "sr": 24000
+ },
+ "q2": {
+  "text": "That glass won't hold till sunrise.",
+  "dur": 2.944,
+  "sr": 24000
+ },
+ "m1": {
+  "text": "There's one more way out. Through his office.",
+  "dur": 2.3893333333333335,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part thirteen. Through the office.",
+  "dur": 2.0906666666666665,
+  "sr": 24000
+ }
+}
