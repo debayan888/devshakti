@@ -182,55 +182,94 @@ TOT = TL['total'] / FPS
 def steps_between(t0, t1, per, kind, g, pan=0, rev=None, jitter=.01):
     t = t0
     while t < t1: put('sfx', footstep(kind, 1), t, g * rng.uniform(.85, 1.1), pan, rev, .2); t += per + rng.uniform(-jitter, jitter)
-# ------------------------------------------------------------------ voice: whispers, then Ray panting in the corridor
+# ================================================================== EP13 v2: mood score + dense foley + expressive voices (scorekit)
+import sys; sys.path.insert(0, '.')
+from scorekit import *
+from scorekit import _n, _bp, _lp, _hp, _ad, _t, _rng
+# ------------------------------------------------------------------ voices, each with its feeling
+FEEL = {'m1': 'fear', 'q1': 'whisper', 'd1': 'whisper', 'm0': 'whisper', 'm2': 'fearwhisper', 'q2': 'tired', 'd4': 'shout', 'q4': 'pain', 'd5': 'shout', 'd3': 'fear', 'q3': 'tired'}
 for l in TL['lines']:
     lid = l['id']; d, sr = sf.read(f'vo15/{lid}.wav'); x = np.interp(np.arange(0, len(d), sr / SR), np.arange(len(d)), d); t0 = l['t0'] / FPS
-    sp = l.get('speaker'); w = hp(vo_process(x), 180) * (.85 if lid != 'end' else 1.0)
-    put('vo', w, t0, 1.0, -.1 if sp == 'ray' else -.15 if sp == 'mira' else .05, 'room' if t0 < 46 else 'well', .08)
+    sp = l.get('speaker'); fe = FEEL.get(lid); v = vo_process(x)
+    if fe == 'whisper': v = whisper(v, .5) * .9
+    elif fe == 'fearwhisper': v = fear(whisper(v, .55), .22, 8) * .85
+    elif fe == 'fear': v = fear(v, .16, 7) * .95
+    elif fe == 'shout': v = shout(v, 3.2) * 1.1
+    elif fe == 'pain': v = pain(v) * 1.15
+    elif fe == 'tired': v = tired(v)
+    room = 'well' if t0 > 46 else 'room'
+    put('vo', v, t0, 1.0, -.1 if sp == 'ray' else -.15 if sp == 'mira' else .05, room, .2 if fe in ('shout', 'pain') else .08)
+    if fe in ('whisper', 'fearwhisper', 'fear') and lid != 'm0': put('sfx', gasp(.35), t0 - .32, .3, 0)          # a breath before each scared line
 VOENV = np.sqrt(np.maximum(1e-9, signal.fftconvolve(BUS['vo'][0] ** 2, np.ones(int(.06 * SR)) / int(.06 * SR))[:N]))
 SH = TL['shots']; ST = {k: v[0] / FPS for k, v in SH.items()}
-put('amb', S(lp(noise(TOT), 300) * .025, bp(noise(TOT), 1500, 6000) * .006), 0, 1, .2)
-put('amb', S(lp(noise(TOT - 46.2), 120) * .05, np.sin(2 * np.pi * 50 * tt(TOT - 46.2)) * .01), 46.2, 1, 0)        # corridor: pipes hum
-put('sfx', crack(.6), EV['krk'], .4, .5, 'room', .2)
-for k in ['k1', 'k2', 'k3', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'f1', 'f2', 'f3']: put('sfx', S(hp(wood_hit(1.0), 400) * .65), EV[k], .6, .3, 'room', .2)
-put('sfx', creak(1.0, 300, .7), EV['open'], .45, -.3, 'room', .3)
-t = 17.0                                                                                                               # three sets of careful steps
+# ------------------------------------------------------------------ ambience by place
+put('amb', S(_lp(_n(TOT), 300) * .025, _bp(_n(TOT), 1500, 6000) * .006), 0, 1, .2)
+put('amb', glass_stress(9.0, .5), 0, .12, .5)                                                                            # booth: the glass groans
+put('amb', flies(14.0, .9), 17.0, .3, -.2); put('amb', flies(8.0, .6), 31.0, .3, -.3)                                    # Patel's office: flies
+put('amb', wet_breath(14.0, 1.4), 17.0, .22, .05)                                                                       # his wet rattling breath, close
+put('amb', S(_lp(_n(TOT - 46.2), 120) * .05, np.sin(2 * np.pi * 50 * _t(TOT - 46.2)) * .01), 46.2, 1, 0)               # corridor pipes
+for tt_ in np.arange(1.0, 9.0, 1.15): put('sfx', S(thump(.12, 400, 200, .02) * .4), tt_, .25, .55, 'room', .3)        # foreheads tapping the glass
+put('sfx', S(crack(.7), glass_stress(1.0, 1.0)), EV['krk'], .6, .5, 'room', .25)
+# ------------------------------------------------------------------ knocks, steps, keys, lock
+for k in ['k1', 'k2', 'k3', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'f1', 'f2', 'f3']: put('sfx', S(hp(wood_hit(1.0), 400) * .7, thump(.15, 160, 80, .03) * .3), EV[k], .7, .3, 'room', .2)
+put('sfx', creak(1.2, 280, .8), EV['open'], .55, -.3, 'room', .3)
+t = 17.0
 while t < 31.0:
-    if (t < 22.4) or (24.6 < t < 25.4) or (t > 27.2): put('sfx', footstep('carpet', 1), t, .16, -.1, 'room', .1); put('sfx', footstep('carpet', 1), t + .2, .14, .1, 'room', .1)
+    if (t < 22.4) or (24.6 < t < 25.4) or (t > 27.2):
+        put('sfx', footstep('carpet', 1), t, .14, -.1, 'room', .1)
+        if _rng.random() < .55: put('sfx', floor_creak(.6), t + .05, .3, _rng.uniform(-.4, .4), 'room', .2)          # old floorboards
     t += .62
-put('sfx', S(lp(noise(14.0), 400) * (np.sin(2 * np.pi * .4 * tt(14.0)) > .3) * .12), 17.0, .45, 0)               # Patel's wet breathing
-put('sfx', S(bp(noise(.5), 800, 3000) * env_ad(int(.5 * SR), .01, .15) * .3), EV['grab_keys'], .35, .1)            # keys lifted
-put('sfx', S(sum(ding(f0, .5, .8) for f0 in (2400, 3100, 3900)) * .5), EV['jingle'], .7, -.1, 'room', .2)          # *jingle*
-put('sfx', S(bp(noise(.4), 500, 2500) * env_ad(int(.4 * SR), .02, .12) * .5), EV['jingle'] + .25, .45, 0)          # his head snaps round (sniff)
-for kk in range(12): put('sfx', heart(1.0), 25.2 + kk * .5, .45)
-for k in ('key1', 'key2'): put('sfx', S(click(.6), bp(noise(.5), 1500, 5000) * np.abs(np.sin(tt(.5) * 30)) * .2), EV[k], .4, -.3)
-put('sfx', S(click(1.0) * 1.3, thump(.15, 200, 100, .03) * .6), EV['key3'], .6, -.3)
-put('sfx', creak(.9, 380, .8), EV['bdoor'], .4, -.4, 'room', .3)
-put('sfx', S(glass(1.4, 1.2), impact(.8, .7)), EV['crash'], 1.0, .5, 'room', .35)
-put('sfx', S(groan(1.2, 90, 3, 1.0)), EV['crash'] + .4, .5, -.1, 'room', .3)                                         # Patel roars at the noise
+for tt_ in (18.5, 21.8, 28.6): put('sfx', growl(.9, 62, .6), tt_, .35, .05, 'room', .3)                               # Patel's low growl as they pass
+put('sfx', keys_rattle(.35, .5), EV['grab_keys'], .45, .1)
+put('sfx', S(keys_rattle(.6, 1.0), sum(ding(f0, .5, .8) for f0 in (2400, 3100, 3900)) * .5), EV['jingle'], .9, -.1, 'room', .25)   # *jingle*
+put('sfx', gasp(1.0), EV['jingle'] + .12, .7, -.2)                                                                    # Mira's gasp
+put('sfx', snarl(1.0), EV['jingle'] + .3, .7, .05, 'room', .3)                                                        # his head snaps round
+for k in ('key1', 'key2'): put('sfx', S(lock_ratchet(1.0), keys_rattle(.3, .6)), EV[k], .6, -.3)
+put('sfx', S(lock_ratchet(1.0), click(1.0) * 1.4, thump(.15, 200, 100, .03) * .7), EV['key3'], .8, -.3)
+put('sfx', creak(1.1, 380, .9), EV['bdoor'], .5, -.4, 'room', .3)
+# ------------------------------------------------------------------ the crash, the run, the grab, the slam
+put('sfx', rev_swell(1.0, 1.0), EV['crash'] - 1.0, .5, .5)
+put('sfx', S(glass(1.4, 1.3), impact(.9, .9)), EV['crash'], 1.0, .5, 'room', .35); put('sfx', shards(1.8, 1.0), EV['crash'] + .15, .6, .5, 'room', .3)
+put('sfx', S(snarl(1.2), growl(1.2, 80, .8)), EV['crash'] + .35, .8, -.05, 'room', .3)
 t = EV['run']
-while t < EV['slam']: put('sfx', footstep('wood', 1), t, .55, 0, 'room', .15); t += .2
-put('sfx', S(wood_hit(1.0), cloth(.4, 1.0), thump(.3, 150, 60, .05)), EV['grab'], .9, 0, 'room', .25)
-put('sfx', S(bp(noise(.4), 1500, 6000) * env_ad(int(.4 * SR), .002, .1) * .8), EV['free'], .6, 0)                  # sleeve rips
-put('sfx', door_slam(), EV['slam'], .9, .3, 'well', .3)
-for k in ('bang1', 'bang2'): put('sfx', S(wood_hit(1.2), thump(.4, 90, 40, .1)), EV[k], .9, .4, 'well', .3)
-put('sfx', S(lp(noise(5.0), 900) * (np.sin(2 * np.pi * 1.6 * tt(5.0)) * .5 + .5) * .3), 46.4, .4, .3)             # Ray panting
+while t < EV['slam']: put('sfx', footstep('wood', 1), t, .6, 0, 'room', .15); t += .19
+put('sfx', S(snarl(1.4)), EV['lunge'], 1.0, .1, 'room', .2)
+put('sfx', S(flesh(1.2), scuffle(.5, 1.0), wood_hit(.6) * .5), EV['grab'], 1.0, 0, 'room', .25)
+put('sfx', S(rip(1.2), flesh(.8)), EV['free'], .9, 0)
+put('sfx', door_slam(), EV['slam'], 1.0, .3, 'well', .3); put('sfx', tinnitus(2.6, 1.0), EV['slam'] + .05, .5, 0)
+for k in ('bang1', 'bang2'): put('sfx', S(wood_hit(1.3), thump(.4, 90, 40, .1)), EV[k], 1.0, .4, 'well', .3)
+put('sfx', S(snarl(.8), growl(1.5, 60, .7)), EV['bang1'] + .2, .6, .4, 'well', .3)
+put('sfx', pant(5.6, 1.7, 1.0), 46.3, .45, .3)                                                                        # Ray panting
+for kk in range(6): put('sfx', drip(1.0), 47.0 + kk * .7, .35, .3, 'well', .3)                                         # his blood dripping on concrete
 for kk in range(10): put('sfx', heart(1.0), 46.8 + kk * .55, .45 + .02 * kk)
-e13 = ST['end13']; put('sfx', impact(1.4, 1.0), e13 + .05, .7); put('sfx', ding(880, 2.2, .8), e13 + .35, .5, 0, 'room', .3)
+e13 = ST['end13']; put('sfx', S(braam(33, 2.6, 1.0)), e13 + .02, .8); put('sfx', ding(880, 2.2, .8), e13 + .5, .45, 0, 'room', .3)
+# ------------------------------------------------------------------ the score (mood by beat)
 mus = np.zeros(N)
 def madd(x, t, g=1.0):
     i = int(t * SR)
     if i < N: x = x[:N - i]; mus[i:i + len(x)] += x * g
-tN = np.arange(N) / SR
-drone = (np.sin(2 * np.pi * 55 * tN) * .6 + lp(signal.sawtooth(2 * np.pi * 110 * tN * (1 + .002 * np.sin(tN * .3))) * .3, 500)) * .35
-sect = np.interp(tN, [0, 9, 17, 25.4, 27.2, 31, 35.4, 39, 42.4, 44.6, 46.2, 52.6, 57.6], [.4, .4, .6, 1, .6, .7, .4, .4, 1, 1, .6, .3, .3]); mus += drone * sect * .3
-for ft, gg in ((EV['jingle'], .8), (EV['key3'], .5), (EV['crash'], 1.0), (EV['grab'], 1.0)): madd(thump(1.2, 90, 30, .3) * 1.3 + lp(noise(1.2), 600) * env_ad(int(1.2 * SR), .002, .3) * .3, ft, gg * .7)
+madd(stinger(1.0), 0.0, .7)                                                                                          # cold-open hit on the glass
+madd(S(drone(33, 9.4, 1.0), pad([57, 60, 64], 9.4, 700, .15, 1.0, 1.5, 1.0)), 0, .35)                                  # dread
+madd(pulse(33, 70, 8.0, 1.0), 9.0, .45); madd(pad([57, 60, 63, 68], 8.4, 900, .25, 1.2, 1.0, 1.0), 9.0, .35)            # plan: tension pulse
+madd(braam(33, 2.0, .8), EV['open'], .5)
+madd(plucks([45, None, 48, None, 45, None, 51, 50], 84, 8.2, 1.0), 17.0, .5); madd(pad([45, 52, 57], 8.4, 500, 0, 2, 1, 1.0), 17.0, .3)   # stealth
+madd(musicbox([76, 79, 75, 72, 71, 72, 75, 76], .3, 1.0), EV['led_in'], .5)                                            # the ledger: eerie music box
+madd(stinger(1.0), EV['jingle'], .9)                                                                                 # SCARE - then nothing for 1.6 s
+madd(plucks([45, None, 44, None, 45, None, 48, None], 76, 3.8, 1.0), 27.2, .45); madd(pad([45, 52, 56], 4.0, 500, 0, 1, 1, 1.0), 27.2, .25)
+madd(tick(4.4, 120, 1.0), 31.0, .7); madd(S(pulse(33, 120, 4.4, 1.0)), 31.0, .4)                                       # keys: the clock
+for k, m in (('key1', 64), ('key2', 66)): madd(pad([m, m + 1], .8, 1200, 0, .02, .5, 1.0), EV[k], .3)                  # each wrong key: a sour stab
+madd(pad([57, 61, 64, 69], 3.6, 1100, 0, .05, 2.0, 1.0), EV['key3'], .45)                                              # CLICK: relief chord
+madd(S(drone(33, 4.0, 1.0), pad([57, 60, 64], 4.0, 800, .3, 1.5, .5, 1.0)), 38.6, .35)                                  # "your turn, old man": swell
+madd(braam(31, 2.6, 1.0), EV['crash'], .85); madd(chase(EV['slam'] - EV['crash'], 172, 43, 1.0), EV['crash'] + .1, .75)  # CHASE
+madd(taiko(1.0), EV['grab'], .9); madd(stinger(1.0), EV['grab'], .6)
+madd(S(drone(29, TOT - 46.4, 1.0), pad([53, 56, 60], TOT - 46.4, 600, .2, 3, 1, 1.0)), 46.4, .3)                        # after the slam: shock + dread
+madd(musicbox([72, 71, 67, 63], .55, 1.0), 49.8, .45)                                                                 # "did he bite you?"
 def note(f, d, a=.01, r=.2, det=.004):
     t = tt(d); ph = 2 * np.pi * f * t; s_ = (signal.sawtooth(ph) + signal.sawtooth(ph * (1 + det)) + signal.sawtooth(ph * (1 - det))) / 3; return s_ * np.minimum(t / a, 1) * np.minimum((d - t) / r, 1)
-madd(lp(sum(note(f, 4.6, .6, 1.4) for f in (110, 130.8, 164.8)), 1500), e13 + .3, .25)
+madd(lp(sum(note(f, 4.6, .6, 1.4) for f in (110, 130.8, 164.8)), 1500), e13 + .3, .3)
 
 duck = 1 - .55 * np.clip(lp(VOENV / (np.percentile(VOENV, 98) + 1e-9), 4, 1), 0, 1); mus *= duck; BUS['mus'][0] += mus * .5; BUS['mus'][1] += mus * .5
-GS, GA, GR, GM = .22, .5, .18, .8
+GS, GA, GR, GM = .14, .33, .16, .36
 mix = BUS['vo'] + (BUS['sfx'] * GS + BUS['amb'] * GA + BUS['rev'] * GR) * (1 - .4 * np.clip(lp(VOENV / (np.percentile(VOENV, 98) + 1e-9), 6, 1), 0, 1)) + BUS['mus'] * GM
 mix = np.stack([hp(mix[0], 28), hp(mix[1], 28)])
 from scipy import ndimage

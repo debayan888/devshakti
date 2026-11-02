@@ -117,7 +117,7 @@ function grabInsert(ctx, f, ts) {                                               
 }
 // ----------------------------------------------------------------------------------------------- shots
 SHOT.booth13 = (ctx, lt, lf, len, t, f) => {                                            // the cracks grow; Mira: the office has a back door
-  const ts = t / 60, FR = f / 60, cam = FR < 5.0 ? { x: -330, y: -180, z: 2.0 } : { x: 20, y: -265, z: 2.0 };
+  const ts = t / 60, FR = f / 60, cam = FR < 1.2 ? { x: 400, y: -235, z: lerp(2.3, 2.6, ts / 1.2) } : FR < 5.0 ? { x: -330, y: -180, z: 2.0 } : { x: 20, y: -265, z: 2.0 };   // cold open: the cracking glass
   ctx.save(); applyCam(ctx, { ...cam, hand: .9 }, t, [[EVF('krk'), 4]]);
   booth12(ctx, f, 46 + ts * .2, { mlook: [.9, 0], clook: [-.9, -.2], rface: { look: [.9, 0], brow: .9 } });
   ctx.restore(); vig(ctx, .6);
@@ -160,6 +160,14 @@ SHOT.lock13 = (ctx, lt, lf, len, t, f) => {                                     
 SHOT.ray13 = (ctx, lt, lf, len, t, f) => {                                              // "Your turn, old man." -> CRASH -> he runs -> Patel grabs him
   const ts = t / 60, FR = f / 60;
   if (FR >= EVS('grab') && FR < EVS('free')) { grabInsert(ctx, f, ts); return; }
+  if (FR >= EVS('shout') && FR < EVS('run')) {                                          // Dev in the service doorway: "Ray! RUN!"
+    ctx.save(); applyCam(ctx, { x: -450, y: -250, z: 2.3, hand: 1.6 }, t, [[EVF('shout'), 8]]); officeSet(ctx, f, ts, { bdoor: 1 });
+    person(ctx, DEVH(-470, 0, basePose(pf3(f), { lean: .25, face: devFace(f, { wide: true, eyes: 1.35, brow: -1, look: [.9, 0], mouth: Math.max(.7, devTalk(f)), sweat: true }), hands: { L: [90, -230], R: [70, -170] } }), { dir: 1, hoodie: false }), pf3(f));
+    dark13(ctx, .5); ctx.restore(); vig(ctx, .6); return; }
+  if (FR >= EVS('lunge') && FR < EVS('grab')) {                                         // Patel lunging - snarling ECU
+    ctx.save(); applyCam(ctx, { x: 95, y: -290, z: lerp(2.8, 3.4, (ts - EVS('lunge')) / .5), hand: 2.2 }, t, [[EVF('lunge'), 14]]); officeSet(ctx, f, ts); patel13(ctx, f, ts); dark13(ctx, .45); ctx.restore();
+    ctx.fillStyle = `rgba(160,0,0,${.25 * (1 - clamp((ts - EVS('lunge')) / .3))})`; ctx.fillRect(0, 0, W, H); vig(ctx, .7);
+    sfxPop(ctx, 'GRRAAH!', W / 2, 600, f, EVF('lunge'), PAL.red, 110, 30, -.06); return; }
   const run = clamp((ts - EVS('run')) / 2.0), rx = ts < EVS('run') ? 470 : lerp(470, -470, run), stall = FR >= EVS('free') ? 0 : 1;
   const cam = FR < EVS('crash') ? { x: 420, y: -250, z: 1.9 } : FR < EVS('run') ? { x: 520, y: -240, z: 1.6 } : { x: lerp(200, -250, run), y: -250, z: 1.35 };
   ctx.save(); applyCam(ctx, { ...cam, hand: 1.2 }, t, [[EVF('crash'), 16], [EVF('grab'), 10], [EVF('slam'), 10]]);

@@ -38,5 +38,25 @@
   "text": "Part fourteen. Did he bite him?",
   "dur": 2.176,
   "sr": 24000
+ },
+ "d4": {
+  "text": "Ray! RUN!",
+  "dur": 0.9386666666666666,
+  "sr": 24000
+ },
+ "q4": {
+  "text": "Aaagh!",
+  "dur": 0.9293333333333333,
+  "sr": 24000
+ },
+ "d5": {
+  "text": "I've got you! Pull!",
+  "dur": 1.408,
+  "sr": 24000
+ },
+ "m0": {
+  "text": "Oh god...",
+  "dur": 0.8746666666666667,
+  "sr": 24000
  }
 }

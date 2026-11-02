@@ -2,10 +2,10 @@
 import json, re, numpy as np, soundfile as sf
 FPS = 60
 meta = json.load(open('vo15/meta.json'))
-START = {'m1': 1.4, 'q1': 5.2, 'd1': 9.6, 'm2': 34.8, 'q2': 39.4, 'd3': 48.2, 'q3': 50.2, 'end': 53.0}
-SPEAKER = {'m1': 'mira', 'm2': 'mira', 'q1': 'ray', 'q2': 'ray', 'q3': 'ray'}
+START = {'m1': 1.4, 'q1': 5.2, 'd1': 9.6, 'm0': 25.7, 'm2': 34.8, 'q2': 39.4, 'd4': 42.95, 'q4': 44.62, 'd5': 45.55, 'd3': 48.2, 'q3': 50.2, 'end': 53.0}
+SPEAKER = {'m0': 'mira', 'q4': 'ray', 'm1': 'mira', 'm2': 'mira', 'q1': 'ray', 'q2': 'ray', 'q3': 'ray'}
 SHOTS = {'booth13': (0, 9.0), 'plan13': (9.0, 17.0), 'office13': (17.0, 31.0), 'lock13': (31.0, 39.0), 'ray13': (39.0, 46.2), 'corr13': (46.2, 52.6), 'end13': (52.6, 57.6)}
-EVENTS = {'krk': 1.0, 'stand': 12.0, 'k1': 14.6, 'k2': 15.1, 'k3': 15.6, 'open': 16.0, 'r1': 20.0, 'r2': 20.5, 'r3': 21.0, 'led_in': 22.6, 'grab_keys': 23.6, 'led_out': 24.4, 'jingle': 25.4, 'r4': 26.0, 'r5': 26.4, 'r6': 26.8, 'key1': 31.8, 'key2': 33.0, 'key3': 34.4, 'bdoor': 35.4, 'f1': 40.6, 'f2': 41.1, 'f3': 41.6, 'crash': 42.4, 'run': 43.6, 'grab': 44.6, 'free': 45.3, 'slam': 46.0, 'bang1': 46.6, 'bang2': 47.3}
+EVENTS = {'krk': 1.0, 'stand': 12.0, 'k1': 14.6, 'k2': 15.1, 'k3': 15.6, 'open': 16.0, 'r1': 20.0, 'r2': 20.5, 'r3': 21.0, 'led_in': 22.6, 'grab_keys': 23.6, 'led_out': 24.4, 'jingle': 25.4, 'r4': 26.0, 'r5': 26.4, 'r6': 26.8, 'key1': 31.8, 'key2': 33.0, 'key3': 34.4, 'bdoor': 35.4, 'f1': 40.6, 'f2': 41.1, 'f3': 41.6, 'crash': 42.4, 'shout': 43.0, 'run': 43.6, 'lunge': 44.1, 'grab': 44.6, 'free': 45.3, 'slam': 46.0, 'bang1': 46.6, 'bang2': 47.3}
 TOTAL = 57.6
 def syl(w):
     w = re.sub(r'[^a-z]', '', w.lower()); n = len(re.findall(r'[aeiouy]+', w))
