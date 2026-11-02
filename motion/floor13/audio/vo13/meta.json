@@ -1,0 +1,62 @@
+{
+ "d1": {
+  "text": "Cole. Who cut the straps?",
+  "dur": 1.6213333333333333,
+  "sr": 24000
+ },
+ "v1": {
+  "text": "I did. With glass from the window.",
+  "dur": 2.0906666666666665,
+  "sr": 24000
+ },
+ "m1": {
+  "text": "Why would you set them free?",
+  "dur": 1.3866666666666667,
+  "sr": 24000
+ },
+ "v2": {
+  "text": "They stopped screaming. All at once. Then they just stared at the light.",
+  "dur": 3.498666666666667,
+  "sr": 24000
+ },
+ "q1": {
+  "text": "Light. Not sound.",
+  "dur": 1.664,
+  "sr": 24000
+ },
+ "m2": {
+  "text": "Then our booth is the brightest thing in this lobby.",
+  "dur": 2.453333333333333,
+  "sr": 24000
+ },
+ "d2": {
+  "text": "Mira. The exit sign.",
+  "dur": 1.7493333333333334,
+  "sr": 24000
+ },
+ "m3": {
+  "text": "It runs on battery. I can't switch it off.",
+  "dur": 2.3893333333333335,
+  "sr": 24000
+ },
+ "v3": {
+  "text": "Don't. Move.",
+  "dur": 1.1946666666666668,
+  "sr": 24000
+ },
+ "q2": {
+  "text": "I'll kill the light.",
+  "dur": 1.408,
+  "sr": 24000
+ },
+ "d3": {
+  "text": "Patel's door... is open.",
+  "dur": 2.24,
+  "sr": 24000
+ },
+ "end": {
+  "text": "Part twelve. Lights out.",
+  "dur": 1.728,
+  "sr": 24000
+ }
+}
